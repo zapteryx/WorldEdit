@@ -107,7 +107,7 @@ public class LocaleManager {
             bundles.put(locale, bundle);
             return bundle;
         } catch (MissingResourceException e) {
-            log.log(Level.WARNING, "Failed to load resource bundle", e);
+            log.log(Level.WARNING, "Failed to load resource bundle", e); //NON-NLS
             return null;
         } finally {
             writeLock.unlock();

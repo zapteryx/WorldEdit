@@ -100,7 +100,7 @@ public class RequestLocale {
             try {
                 return bundle.getString(key);
             } catch (MissingResourceException e) {
-                log.log(Level.WARNING, "Failed to find message", e);
+                log.log(Level.WARNING, "Failed to find message", e); //NON-NLS
             }
         }
 
@@ -125,7 +125,7 @@ public class RequestLocale {
                 formatter.setLocale(requestLocale.getLocale());
                 return formatter.format(args);
             } catch (MissingResourceException e) {
-                log.log(Level.WARNING, "Failed to find message", e);
+                log.log(Level.WARNING, "Failed to find message", e); //NON-NLS
             }
         }
 
