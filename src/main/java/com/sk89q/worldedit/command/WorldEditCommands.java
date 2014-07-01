@@ -34,25 +34,28 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import static com.sk89q.worldedit.util.i18n.RequestLocale._;
+
 public class WorldEditCommands {
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
-    
+    private static final String GITHUB_URL = "https://github.com/sk89q/worldedit/"; //NON-NLS
+
     private final WorldEdit we;
-    
+
     public WorldEditCommands(WorldEdit we) {
         this.we = we;
     }
 
     @Command(
-        aliases = { "version", "ver" },
-        usage = "",
-        desc = "Get WorldEdit version",
-        min = 0,
-        max = 0
+            aliases = { "version", "ver" },
+            usage = "",
+            desc = "Get WorldEdit version",
+            min = 0,
+            max = 0
     )
     public void version(Actor actor) throws WorldEditException {
-        actor.print("WorldEdit version " + WorldEdit.getVersion());
-        actor.print("https://github.com/sk89q/worldedit/");
+        actor.print(_("command.worldEdit.version.currentVersion", WorldEdit.getVersion()));
+        actor.print(GITHUB_URL);
 
         PlatformManager pm = we.getPlatformManager();
 
@@ -69,11 +72,11 @@ public class WorldEditCommands {
     }
 
     @Command(
-        aliases = { "reload" },
-        usage = "",
-        desc = "Reload configuration",
-        min = 0,
-        max = 0
+            aliases = { "reload" },
+            usage = "",
+            desc = "Reload configuration",
+            min = 0,
+            max = 0
     )
     @CommandPermissions("worldedit.reload")
     public void reload(Actor actor) throws WorldEditException {
@@ -82,11 +85,11 @@ public class WorldEditCommands {
     }
 
     @Command(
-        aliases = { "cui" },
-        usage = "",
-        desc = "Complete CUI handshake (internal usage)",
-        min = 0,
-        max = 0
+            aliases = { "cui" },
+            usage = "",
+            desc = "Complete CUI handshake (internal usage)",
+            min = 0,
+            max = 0
     )
     public void cui(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
         session.setCUISupport(true);
@@ -94,11 +97,11 @@ public class WorldEditCommands {
     }
 
     @Command(
-        aliases = { "tz" },
-        usage = "[timezone]",
-        desc = "Set your timezone for snapshots",
-        min = 1,
-        max = 1
+            aliases = { "tz" },
+            usage = "[timezone]",
+            desc = "Set your timezone for snapshots",
+            min = 1,
+            max = 1
     )
     public void tz(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
         TimeZone tz = TimeZone.getTimeZone(args.getString(0));
@@ -109,11 +112,11 @@ public class WorldEditCommands {
     }
 
     @Command(
-        aliases = { "help" },
-        usage = "[<command>]",
+            aliases = { "help" },
+            usage = "[<command>]",
             desc = "Displays help for WorldEdit commands",
-        min = 0,
-        max = -1
+            min = 0,
+            max = -1
     )
     @CommandPermissions("worldedit.help")
     public void help(Actor actor, CommandContext args) throws WorldEditException {

@@ -31,6 +31,7 @@ import com.sk89q.worldedit.internal.ServerInterfaceAdapter;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.eventbus.Subscribe;
+import com.sk89q.worldedit.util.i18n.RequestLocale;
 import com.sk89q.worldedit.world.World;
 
 import javax.annotation.Nullable;
@@ -293,6 +294,9 @@ public class PlatformManager {
         Location location = event.getLocation();
         Vector vector = location.toVector();
 
+        // Set the current locale
+        RequestLocale.setLocale(worldEdit.getLocaleManager(), actor.getLocale());
+
         // At this time, only handle interaction from players
         if (actor instanceof Player) {
             Player player = (Player) actor;
@@ -371,6 +375,9 @@ public class PlatformManager {
         // making changes to the world
         Player player = createProxyActor(event.getPlayer());
         World world = player.getWorld();
+
+        // Set the current locale
+        RequestLocale.setLocale(worldEdit.getLocaleManager(), player.getLocale());
 
         switch (event.getInputType()) {
             case PRIMARY: {

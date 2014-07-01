@@ -19,7 +19,15 @@
 
 package com.sk89q.worldedit.extension.platform;
 
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.BlockWorldVector;
+import com.sk89q.worldedit.LocalPlayer;
+import com.sk89q.worldedit.NotABlockException;
+import com.sk89q.worldedit.PlayerDirection;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.worldedit.WorldEditPermissionException;
+import com.sk89q.worldedit.WorldVector;
+import com.sk89q.worldedit.WorldVectorFace;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
@@ -30,8 +38,7 @@ import com.sk89q.worldedit.util.TargetBlock;
 import com.sk89q.worldedit.world.World;
 
 import java.io.File;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Locale;
 
 /**
  * An abstract implementation of both a {@link Actor} and a {@link Player}
@@ -39,6 +46,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * players that make use of WorldEdit.
  */
 public abstract class AbstractPlayerActor implements Actor, Player {
+
+    @Override
+    public Locale getLocale() {
+        return Locale.getDefault();
+    }
 
     /**
      * Returns direction according to rotation. May return null.

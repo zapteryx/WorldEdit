@@ -45,12 +45,18 @@ import com.sk89q.worldedit.scripting.RhinoCraftScriptEngine;
 import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.session.request.Request;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.util.i18n.LocaleManager;
 import com.sk89q.worldedit.util.logging.WorldEditPrefixHandler;
 
 import javax.script.ScriptException;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -83,6 +89,7 @@ public class WorldEdit {
     private final PlatformManager platformManager = new PlatformManager(this);
     private final EditSessionFactory editSessionFactory = new EditSessionFactory.EditSessionFactoryImpl(eventBus);
     private final SessionManager sessions = new SessionManager(this);
+    private final LocaleManager localeManager = new LocaleManager("com.sk89q.worldedit.lang.Messages", new Locale("en", "US"));
 
     private final BlockRegistry blockRegistry = new BlockRegistry(this);
     private final MaskRegistry maskRegistry = new MaskRegistry(this);
@@ -168,6 +175,15 @@ public class WorldEdit {
      */
     public SessionManager getSessionManager() {
         return sessions;
+    }
+
+    /**
+     * Get the locale manager.
+     *
+     * @return the locale manager
+     */
+    public LocaleManager getLocaleManager() {
+        return localeManager;
     }
 
     /**

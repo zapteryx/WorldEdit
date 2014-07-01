@@ -21,9 +21,9 @@ package com.sk89q.worldedit.extension.platform;
 
 import com.sk89q.worldedit.WorldEditPermissionException;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
-import com.sk89q.worldedit.world.World;
 
 import java.io.File;
+import java.util.Locale;
 
 /**
  * An object that can perform actions in WorldEdit.
@@ -36,6 +36,13 @@ public interface Actor {
      * @return String
      */
     String getName();
+
+    /**
+     * Get the locale for messages for this actor.
+     *
+     * @return the locale
+     */
+    Locale getLocale();
 
     /**
      * Print a message.

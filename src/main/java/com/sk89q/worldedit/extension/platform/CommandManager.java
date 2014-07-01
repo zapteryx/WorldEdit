@@ -42,6 +42,7 @@ import com.sk89q.worldedit.util.command.fluent.CommandGraph;
 import com.sk89q.worldedit.util.command.parametric.LegacyCommandsHandler;
 import com.sk89q.worldedit.util.command.parametric.ParametricBuilder;
 import com.sk89q.worldedit.util.eventbus.Subscribe;
+import com.sk89q.worldedit.util.i18n.RequestLocale;
 import com.sk89q.worldedit.util.logging.DynamicStreamHandler;
 import com.sk89q.worldedit.util.logging.LogFormat;
 
@@ -201,6 +202,9 @@ public final class CommandManager {
 
         Actor actor = platformManager.createProxyActor(event.getActor());
         String split[] = commandDetection(event.getArguments().split(" "));
+
+        // Set the current locale
+        RequestLocale.setLocale(worldEdit.getLocaleManager(), actor.getLocale());
 
         // No command found!
         if (!dispatcher.contains(split[0])) {

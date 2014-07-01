@@ -26,6 +26,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 import java.io.File;
+import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -47,6 +48,11 @@ public class BukkitCommandSender implements Actor {
     @Override
     public String getName() {
         return sender.getName();
+    }
+
+    @Override
+    public Locale getLocale() {
+        return Locale.getDefault();
     }
 
     @Override
