@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * An extension of {@link Control} that returns a pre-set fallback
  * locale (rather than {@link Locale#getDefault()}).
  */
-class ManagedControl extends Control {
+public class ContainedControl extends Control {
 
     private final Locale defaultLocale;
 
@@ -37,7 +37,7 @@ class ManagedControl extends Control {
      *
      * @param defaultLocale the default locale to return
      */
-    ManagedControl(Locale defaultLocale) {
+    public ContainedControl(Locale defaultLocale) {
         checkNotNull(defaultLocale);
         this.defaultLocale = defaultLocale;
     }

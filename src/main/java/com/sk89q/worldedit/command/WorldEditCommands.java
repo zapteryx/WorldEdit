@@ -22,21 +22,26 @@ package com.sk89q.worldedit.command;
 import com.sk89q.minecraft.util.commands.Command;
 import com.sk89q.minecraft.util.commands.CommandContext;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Capability;
+import com.sk89q.worldedit.extension.platform.CommandManager;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.extension.platform.PlatformManager;
+import com.sk89q.worldedit.util.i18n.MessageBundle;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.TimeZone;
 
-import static com.sk89q.worldedit.util.i18n.RequestLocale._;
-
 public class WorldEditCommands {
+
+    private static final MessageBundle bundle = new MessageBundle(CommandManager.RESOURCE_BUNDLE_NAME, CommandManager.class);
     private static final DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss z");
     private static final String GITHUB_URL = "https://github.com/sk89q/worldedit/"; //NON-NLS
 
@@ -54,7 +59,7 @@ public class WorldEditCommands {
             max = 0
     )
     public void version(Actor actor) throws WorldEditException {
-        actor.print(_("command.worldEdit.version.currentVersion", WorldEdit.getVersion()));
+        actor.print(bundle._("version.current", WorldEdit.getVersion()));
         actor.print(GITHUB_URL);
 
         PlatformManager pm = we.getPlatformManager();

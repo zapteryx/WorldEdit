@@ -20,97 +20,88 @@
 package com.sk89q.worldedit.util.i18n;
 
 import javax.annotation.Nullable;
-import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
-import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ResourceBundle.Control;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Manages the loading of {@link ResourceBundle}s based off the same
- * bundle base name.
+ * The purpose of a {@code LocaleManager} is to manage the loading of
+ * {@code ResourceBundles} and maintain the "active locale" for the current
+ * thread.
+ * <p>
+ * This class allows an "active locale" to be set for the current thread,
+ * which can be used to load a {@link ResourceBundle}. In addition, an instance
+ * of this class stores a {@link Control} that can determine how these bundles
+ * are loaded.
  */
 public class LocaleManager {
 
-    private static final Logger log = Logger.getLogger(LocaleManager.class.getCanonicalName());
-    private final ReadWriteLock readWriteLock = new ReentrantReadWriteLock();
-    private final Lock readLock = readWriteLock.readLock();
-    private final Lock writeLock = readWriteLock.writeLock();
-    private final Map<Locale, ResourceBundle> bundles = new HashMap<Locale, ResourceBundle>();
-    private final String bundleName;
-    private final ManagedControl control;
-    private ClassLoader classLoader = LocaleManager.class.getClassLoader();
+    private static final ThreadLocal<ActiveLocale> threadLocal = new ThreadLocal<ActiveLocale>();
+
+    private final Control control;
 
     /**
      * Create a new instance of the locale manager.
      *
-     * @param bundleName the bundle name
-     * @param defaultLocale the default locale to use if no the requested locale is not found
+     * @param control the control
      */
-    public LocaleManager(String bundleName, Locale defaultLocale) {
-        checkNotNull(bundleName);
-        checkNotNull(defaultLocale);
-        this.control = new ManagedControl(defaultLocale);
-        this.bundleName = bundleName;
+    public LocaleManager(Control control) {
+        checkNotNull(control);
+        this.control = control;
     }
 
     /**
-     * Get the class loader to use to load bundles.
+     * Get the bundle given the bundle name, a locale, and a class loader.
      *
-     * @return the class loader
-     */
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    /**
-     * Set the class loader to load bundles.
-     *
+     * @param bundleName the name of the bundle to load
+     * @param locale the locale
      * @param classLoader the class loader
+     * @return a resource bundle, or null if one could not be found
      */
-    public void setClassLoader(ClassLoader classLoader) {
-        checkNotNull(classLoader);
-        this.classLoader = classLoader;
+    @Nullable
+    public ResourceBundle getBundle(String bundleName, Locale locale, ClassLoader classLoader) {
+        return ResourceBundle.getBundle(bundleName, locale, classLoader, control);
     }
 
+    /**
+     * Set the current thread to use the given locale (as well as this
+     * {@code LocaleManager}.
+     *
+     * @param locale the locale
+     */
+    public void setLocaleForThread(Locale locale) {
+        checkNotNull(locale);
+        threadLocal.set(new ActiveLocale(this, locale));
+    }
+
+    /**
+     * Get the bundle given the bundle name and a class loader, using the
+     * the locale manager set on this thread (if available) to determine
+     * the locale.
+     *
+     * @param bundleName the bundle name
+     * @param classLoader the class loader
+     * @return the bundle or null
+     */
     @Nullable
-    public ResourceBundle getBundleForLocale(Locale locale) {
-        // When Bukkit decides to use a newer version of Guava, then we
-        // can use Guava's cache features
-
-        ResourceBundle bundle;
-
-        // First try to read from the cache
-        try {
-            readLock.lock();
-            bundle = bundles.get(locale);
-            if (bundle != null) {
-                return bundle;
-            }
-        } finally {
-            readLock.unlock();
-        }
-
-        // Try loading the bundle
-        bundle = ResourceBundle.getBundle(bundleName, locale, classLoader, control);
-
-        // Save to cache
-        try {
-            writeLock.lock();
-            bundles.put(locale, bundle);
-            return bundle;
-        } catch (MissingResourceException e) {
-            log.log(Level.WARNING, "Failed to load resource bundle", e); //NON-NLS
+    public static ResourceBundle getBundleForThread(String bundleName, ClassLoader classLoader) {
+        ActiveLocale active = threadLocal.get();
+        if (active != null) {
+            return active.manager.getBundle(bundleName, active.locale, classLoader);
+        } else {
             return null;
-        } finally {
-            writeLock.unlock();
+        }
+    }
+
+    private static class ActiveLocale {
+        private final LocaleManager manager;
+        private final Locale locale;
+
+        private ActiveLocale(LocaleManager manager, Locale locale) {
+            this.manager = manager;
+            this.locale = locale;
         }
     }
 

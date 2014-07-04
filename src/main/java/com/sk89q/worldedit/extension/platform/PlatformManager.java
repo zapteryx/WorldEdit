@@ -19,9 +19,17 @@
 
 package com.sk89q.worldedit.extension.platform;
 
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.LocalConfiguration;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.ServerInterface;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.command.tool.*;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.WorldVector;
+import com.sk89q.worldedit.command.tool.BlockTool;
+import com.sk89q.worldedit.command.tool.DoubleActionBlockTool;
+import com.sk89q.worldedit.command.tool.DoubleActionTraceTool;
+import com.sk89q.worldedit.command.tool.Tool;
+import com.sk89q.worldedit.command.tool.TraceTool;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.event.platform.BlockInteractEvent;
 import com.sk89q.worldedit.event.platform.Interaction;
@@ -31,11 +39,14 @@ import com.sk89q.worldedit.internal.ServerInterfaceAdapter;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.eventbus.Subscribe;
-import com.sk89q.worldedit.util.i18n.RequestLocale;
 import com.sk89q.worldedit.world.World;
 
 import javax.annotation.Nullable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -295,7 +306,7 @@ public class PlatformManager {
         Vector vector = location.toVector();
 
         // Set the current locale
-        RequestLocale.setLocale(worldEdit.getLocaleManager(), actor.getLocale());
+        worldEdit.getLocaleManager().setLocaleForThread(actor.getLocale());
 
         // At this time, only handle interaction from players
         if (actor instanceof Player) {
@@ -377,7 +388,7 @@ public class PlatformManager {
         World world = player.getWorld();
 
         // Set the current locale
-        RequestLocale.setLocale(worldEdit.getLocaleManager(), player.getLocale());
+        worldEdit.getLocaleManager().setLocaleForThread(player.getLocale());
 
         switch (event.getInputType()) {
             case PRIMARY: {

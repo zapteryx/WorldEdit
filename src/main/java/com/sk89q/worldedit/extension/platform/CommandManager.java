@@ -28,7 +28,25 @@ import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.LocalConfiguration;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.command.*;
+import com.sk89q.worldedit.command.BiomeCommands;
+import com.sk89q.worldedit.command.BrushCommands;
+import com.sk89q.worldedit.command.ChunkCommands;
+import com.sk89q.worldedit.command.ClipboardCommands;
+import com.sk89q.worldedit.command.GeneralCommands;
+import com.sk89q.worldedit.command.GenerationCommands;
+import com.sk89q.worldedit.command.HistoryCommands;
+import com.sk89q.worldedit.command.NavigationCommands;
+import com.sk89q.worldedit.command.RegionCommands;
+import com.sk89q.worldedit.command.SchematicCommands;
+import com.sk89q.worldedit.command.ScriptingCommands;
+import com.sk89q.worldedit.command.SelectionCommands;
+import com.sk89q.worldedit.command.SnapshotCommands;
+import com.sk89q.worldedit.command.SnapshotUtilCommands;
+import com.sk89q.worldedit.command.SuperPickaxeCommands;
+import com.sk89q.worldedit.command.ToolCommands;
+import com.sk89q.worldedit.command.ToolUtilCommands;
+import com.sk89q.worldedit.command.UtilityCommands;
+import com.sk89q.worldedit.command.WorldEditCommands;
 import com.sk89q.worldedit.event.platform.CommandEvent;
 import com.sk89q.worldedit.event.platform.CommandSuggestionEvent;
 import com.sk89q.worldedit.internal.command.ActorAuthorizer;
@@ -44,7 +62,6 @@ import com.sk89q.worldedit.util.command.parametric.ParametricBuilder;
 import com.sk89q.worldedit.util.eventbus.Subscribe;
 import com.sk89q.worldedit.util.formatting.ColorCodeBuilder;
 import com.sk89q.worldedit.util.formatting.component.CommandUsageBox;
-import com.sk89q.worldedit.util.i18n.RequestLocale;
 import com.sk89q.worldedit.util.logging.DynamicStreamHandler;
 import com.sk89q.worldedit.util.logging.LogFormat;
 
@@ -64,6 +81,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class CommandManager {
 
+    public static final String RESOURCE_BUNDLE_NAME = "com.sk89q.worldedit.lang.Commands";
     public static final Pattern COMMAND_CLEAN_PATTERN = Pattern.compile("^[/]+");
     private static final Logger logger = Logger.getLogger(CommandManager.class.getCanonicalName());
     private static final java.util.regex.Pattern numberFormatExceptionPattern = java.util.regex.Pattern.compile("^For input string: \"(.*)\"$");
@@ -208,7 +226,7 @@ public final class CommandManager {
         String split[] = commandDetection(event.getArguments().split(" "));
 
         // Set the current locale
-        RequestLocale.setLocale(worldEdit.getLocaleManager(), actor.getLocale());
+        worldEdit.getLocaleManager().setLocaleForThread(actor.getLocale());
 
         // No command found!
         if (!dispatcher.contains(split[0])) {

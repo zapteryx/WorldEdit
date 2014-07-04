@@ -19,9 +19,8 @@
 
 package com.sk89q.worldedit.util.i18n;
 
-import javax.annotation.Nullable;
 import java.text.MessageFormat;
-import java.util.Locale;
+import java.util.Arrays;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.logging.Level;
@@ -30,59 +29,38 @@ import java.util.logging.Logger;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Manages the {@link LocaleManager] and {@link Locale} for the current thread.
+ * Helper class that interacts with a {@code LocaleManager} to localize strings.
+ *
+ * @see LocaleManager stores current locales
  */
-public class RequestLocale {
+public class MessageBundle {
 
-    private static final Logger log = Logger.getLogger(RequestLocale.class.getCanonicalName());
-    private static final ThreadLocal<RequestLocale> threadLocal = new ThreadLocal<RequestLocale>() {
-        @Override
-        protected RequestLocale initialValue() {
-            return new RequestLocale();
-        }
-    };
-
-    private @Nullable LocaleManager manager;
-    private @Nullable Locale locale;
+    private static final Logger log = Logger.getLogger(MessageBundle.class.getCanonicalName());
+    private final String baseName;
+    private final ClassLoader classLoader;
 
     /**
-     * Constructed by the {@link ThreadLocal}.
+     * Create a new instance, using the class loader that was loaded the given
+     * class.
+     *
+     * @param baseName the bundle base name
+     * @param clazz the class with the desired class loader
      */
-    private RequestLocale() {
+    public MessageBundle(String baseName, Class<?> clazz) {
+        this(baseName, clazz.getClassLoader());
     }
 
     /**
-     * Get the current locale.
+     * Create a new instance.
      *
-     * @return the current locale or null
+     * @param baseName the bundle base name
+     * @param classLoader the class loader
      */
-    @Nullable
-    public Locale getLocale() {
-        return locale;
-    }
-
-    /**
-     * Get the current resource bundle.
-     *
-     * @return the current resource bundle, or null if not available
-     */
-    @Nullable
-    public ResourceBundle getBundle() {
-        return manager != null ? manager.getBundleForLocale(locale) : null;
-    }
-
-    /**
-     * Set the locale manager and the locale for the current thread.
-     *
-     * @param manager the locale manager
-     * @param locale the locale
-     */
-    public static void setLocale(LocaleManager manager, Locale locale) {
-        checkNotNull(manager);
-        checkNotNull(locale);
-        RequestLocale requestLocale = threadLocal.get();
-        requestLocale.manager = manager;
-        requestLocale.locale = locale;
+    public MessageBundle(String baseName, ClassLoader classLoader) {
+        checkNotNull(baseName);
+        checkNotNull(classLoader);
+        this.baseName = baseName;
+        this.classLoader = classLoader;
     }
 
     /**
@@ -93,9 +71,8 @@ public class RequestLocale {
      * @param key the key
      * @return the translated string
      */
-    public static String _(String key) {
-        RequestLocale requestLocale = threadLocal.get();
-        ResourceBundle bundle = requestLocale.getBundle();
+    public String _(String key) {
+        ResourceBundle bundle = LocaleManager.getBundleForThread(baseName, classLoader);
         if (bundle != null) {
             try {
                 return bundle.getString(key);
@@ -116,20 +93,20 @@ public class RequestLocale {
      * @param args arguments
      * @return a translated string
      */
-    public static String _(String key, Object... args) {
-        RequestLocale requestLocale = threadLocal.get();
-        ResourceBundle bundle = requestLocale.getBundle();
+    public String _(String key, Object... args) {
+        ResourceBundle bundle = LocaleManager.getBundleForThread(baseName, classLoader);
         if (bundle != null) {
             try {
                 MessageFormat formatter = new MessageFormat(_(key));
-                formatter.setLocale(requestLocale.getLocale());
+                formatter.setLocale(bundle.getLocale());
                 return formatter.format(args);
             } catch (MissingResourceException e) {
                 log.log(Level.WARNING, "Failed to find message", e); //NON-NLS
             }
         }
 
-        return "${" + key + "}:" + args;
+        return "${" + key + "}:" + Arrays.toString(args);
     }
+
 
 }

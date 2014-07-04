@@ -45,6 +45,7 @@ import com.sk89q.worldedit.scripting.RhinoCraftScriptEngine;
 import com.sk89q.worldedit.session.SessionManager;
 import com.sk89q.worldedit.session.request.Request;
 import com.sk89q.worldedit.util.eventbus.EventBus;
+import com.sk89q.worldedit.util.i18n.ContainedControl;
 import com.sk89q.worldedit.util.i18n.LocaleManager;
 import com.sk89q.worldedit.util.logging.WorldEditPrefixHandler;
 
@@ -89,7 +90,7 @@ public class WorldEdit {
     private final PlatformManager platformManager = new PlatformManager(this);
     private final EditSessionFactory editSessionFactory = new EditSessionFactory.EditSessionFactoryImpl(eventBus);
     private final SessionManager sessions = new SessionManager(this);
-    private final LocaleManager localeManager = new LocaleManager("com.sk89q.worldedit.lang.Messages", new Locale("en", "US"));
+    private final LocaleManager localeManager = new LocaleManager(new ContainedControl(new Locale("en", "US")));
 
     private final BlockRegistry blockRegistry = new BlockRegistry(this);
     private final MaskRegistry maskRegistry = new MaskRegistry(this);
