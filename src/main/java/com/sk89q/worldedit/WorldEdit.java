@@ -27,13 +27,13 @@ import com.sk89q.worldedit.event.extent.EditSessionEvent;
 import com.sk89q.worldedit.event.platform.BlockInteractEvent;
 import com.sk89q.worldedit.event.platform.InputType;
 import com.sk89q.worldedit.event.platform.PlayerInputEvent;
+import com.sk89q.worldedit.extension.factory.BlockFactory;
+import com.sk89q.worldedit.extension.factory.MaskFactory;
+import com.sk89q.worldedit.extension.factory.PatternFactory;
 import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.extension.platform.PlatformManager;
-import com.sk89q.worldedit.extension.registry.BlockRegistry;
-import com.sk89q.worldedit.extension.registry.MaskRegistry;
-import com.sk89q.worldedit.extension.registry.PatternRegistry;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Masks;
 import com.sk89q.worldedit.function.pattern.Patterns;
@@ -48,6 +48,7 @@ import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.util.i18n.ContainedControl;
 import com.sk89q.worldedit.util.i18n.LocaleManager;
 import com.sk89q.worldedit.util.logging.WorldEditPrefixHandler;
+import com.sk89q.worldedit.world.registry.BundledBlockData;
 
 import javax.script.ScriptException;
 import java.io.DataInputStream;
@@ -92,13 +93,14 @@ public class WorldEdit {
     private final SessionManager sessions = new SessionManager(this);
     private final LocaleManager localeManager = new LocaleManager(new ContainedControl(new Locale("en", "US")));
 
-    private final BlockRegistry blockRegistry = new BlockRegistry(this);
-    private final MaskRegistry maskRegistry = new MaskRegistry(this);
-    private final PatternRegistry patternRegistry = new PatternRegistry(this);
+    private final BlockFactory blockFactory = new BlockFactory(this);
+    private final MaskFactory maskFactory = new MaskFactory(this);
+    private final PatternFactory patternFactory = new PatternFactory(this);
 
     static {
         WorldEditPrefixHandler.register("com.sk89q.worldedit");
         getVersion();
+        BundledBlockData.getInstance(); // Load block registry
     }
 
     private WorldEdit() {
@@ -140,33 +142,33 @@ public class WorldEdit {
     }
 
     /**
-     * Get the block registry from which new {@link BaseBlock}s can be
+     * Get the block factory from which new {@link BaseBlock}s can be
      * constructed.
      *
-     * @return the block registry
+     * @return the block factory
      */
-    public BlockRegistry getBlockRegistry() {
-        return blockRegistry;
+    public BlockFactory getBlockFactory() {
+        return blockFactory;
     }
 
     /**
-     * Get the mask registry from which new {@link com.sk89q.worldedit.function.mask.Mask}s
+     * Get the mask factory from which new {@link com.sk89q.worldedit.function.mask.Mask}s
      * can be constructed.
      *
-     * @return the mask registry
+     * @return the mask factory
      */
-    public MaskRegistry getMaskRegistry() {
-        return maskRegistry;
+    public MaskFactory getMaskFactory() {
+        return maskFactory;
     }
 
     /**
-     * Get the pattern registry from which new {@link com.sk89q.worldedit.function.pattern.Pattern}s
+     * Get the pattern factory from which new {@link com.sk89q.worldedit.function.pattern.Pattern}s
      * can be constructed.
      *
-     * @return the pattern registry
+     * @return the pattern factory
      */
-    public PatternRegistry getPatternRegistry() {
-        return patternRegistry;
+    public PatternFactory getPatternFactory() {
+        return patternFactory;
     }
 
     /**
@@ -228,7 +230,7 @@ public class WorldEdit {
     }
 
     /**
-     * @deprecated Use {@link #getBlockRegistry()} and {@link BlockRegistry#parseFromInput(String, ParserContext)}
+     * @deprecated Use {@link #getBlockFactory()} and {@link BlockFactory#parseFromInput(String, ParserContext)}
      */
     @SuppressWarnings("deprecation")
     @Deprecated
@@ -237,7 +239,7 @@ public class WorldEdit {
     }
 
     /**
-     * @deprecated Use {@link #getBlockRegistry()} and {@link BlockRegistry#parseFromInput(String, ParserContext)}
+     * @deprecated Use {@link #getBlockFactory()} and {@link BlockFactory#parseFromInput(String, ParserContext)}
      */
     @SuppressWarnings("deprecation")
     @Deprecated
@@ -248,11 +250,11 @@ public class WorldEdit {
         context.setSession(getSession(player));
         context.setRestricted(!allAllowed);
         context.setPreferringWildcard(allowNoData);
-        return getBlockRegistry().parseFromInput(arg, context);
+        return getBlockFactory().parseFromInput(arg, context);
     }
 
     /**
-     * @deprecated Use {@link #getBlockRegistry()} and {@link BlockRegistry#parseFromInput(String, ParserContext)}
+     * @deprecated Use {@link #getBlockFactory()} and {@link BlockFactory#parseFromInput(String, ParserContext)}
      */
     @SuppressWarnings("deprecation")
     @Deprecated
@@ -261,7 +263,7 @@ public class WorldEdit {
     }
 
     /**
-     * @deprecated Use {@link #getBlockRegistry()} and {@link BlockRegistry#parseFromListInput(String, ParserContext)}
+     * @deprecated Use {@link #getBlockFactory()} and {@link BlockFactory#parseFromListInput(String, ParserContext)}
      */
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -275,7 +277,7 @@ public class WorldEdit {
     }
 
     /**
-     * @deprecated Use {@link #getBlockRegistry()} and {@link BlockRegistry#parseFromInput(String, ParserContext)}
+     * @deprecated Use {@link #getBlockFactory()} and {@link BlockFactory#parseFromInput(String, ParserContext)}
      */
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -284,7 +286,7 @@ public class WorldEdit {
     }
 
     /**
-     * @deprecated Use {@link #getBlockRegistry()} and {@link BlockRegistry#parseFromListInput(String, ParserContext)}
+     * @deprecated Use {@link #getBlockFactory()} and {@link BlockFactory#parseFromListInput(String, ParserContext)}
      */
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -293,7 +295,7 @@ public class WorldEdit {
     }
 
     /**
-     * @deprecated Use {@link #getBlockRegistry()} and {@link BlockRegistry#parseFromListInput(String, ParserContext)}
+     * @deprecated Use {@link #getBlockFactory()} and {@link BlockFactory#parseFromListInput(String, ParserContext)}
      */
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -307,7 +309,7 @@ public class WorldEdit {
     }
 
     /**
-     * @deprecated Use {@link #getPatternRegistry()} and {@link BlockRegistry#parseFromInput(String, ParserContext)}
+     * @deprecated Use {@link #getPatternFactory()} and {@link BlockFactory#parseFromInput(String, ParserContext)}
      */
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -316,11 +318,11 @@ public class WorldEdit {
         context.setActor(player);
         context.setWorld(player.getWorld());
         context.setSession(getSession(player));
-        return Patterns.wrap(getPatternRegistry().parseFromInput(input, context));
+        return Patterns.wrap(getPatternFactory().parseFromInput(input, context));
     }
 
     /**
-     * @deprecated Use {@link #getMaskRegistry()} ()} and {@link MaskRegistry#parseFromInput(String, ParserContext)}
+     * @deprecated Use {@link #getMaskFactory()} ()} and {@link MaskFactory#parseFromInput(String, ParserContext)}
      */
     @Deprecated
     @SuppressWarnings("deprecation")
@@ -329,7 +331,7 @@ public class WorldEdit {
         context.setActor(player);
         context.setWorld(player.getWorld());
         context.setSession(session);
-        return Masks.wrap(getMaskRegistry().parseFromInput(input, context));
+        return Masks.wrap(getMaskFactory().parseFromInput(input, context));
     }
 
     /**

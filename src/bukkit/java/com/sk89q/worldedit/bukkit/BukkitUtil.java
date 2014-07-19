@@ -52,7 +52,8 @@ import com.sk89q.worldedit.bukkit.entity.BukkitPainting;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.Dye;
 
-public class BukkitUtil {
+public final class BukkitUtil {
+
     private BukkitUtil() {
     }
 
@@ -109,7 +110,7 @@ public class BukkitUtil {
 
     public static Player matchSinglePlayer(Server server, String name) {
         List<Player> players = server.matchPlayer(name);
-        if (players.size() == 0) {
+        if (players.isEmpty()) {
             return null;
         }
         return players.get(0);

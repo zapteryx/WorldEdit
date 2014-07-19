@@ -51,6 +51,7 @@ import com.sk89q.worldedit.event.platform.CommandEvent;
 import com.sk89q.worldedit.event.platform.CommandSuggestionEvent;
 import com.sk89q.worldedit.internal.command.ActorAuthorizer;
 import com.sk89q.worldedit.internal.command.CommandLoggingHandler;
+import com.sk89q.worldedit.internal.command.UserCommandCompleter;
 import com.sk89q.worldedit.internal.command.WorldEditBinding;
 import com.sk89q.worldedit.internal.command.WorldEditExceptionConverter;
 import com.sk89q.worldedit.session.request.Request;
@@ -83,7 +84,8 @@ public final class CommandManager {
 
     public static final String RESOURCE_BUNDLE_NAME = "com.sk89q.worldedit.lang.Commands";
     public static final Pattern COMMAND_CLEAN_PATTERN = Pattern.compile("^[/]+");
-    private static final Logger logger = Logger.getLogger(CommandManager.class.getCanonicalName());
+    private static final Logger log = Logger.getLogger(CommandManager.class.getCanonicalName());
+    private static final Logger commandLog = Logger.getLogger(CommandManager.class.getCanonicalName() + ".CommandLog");
     private static final java.util.regex.Pattern numberFormatExceptionPattern = java.util.regex.Pattern.compile("^For input string: \"(.*)\"$");
 
     private final WorldEdit worldEdit;
@@ -106,16 +108,17 @@ public final class CommandManager {
         worldEdit.getEventBus().register(this);
 
         // Setup the logger
-        logger.addHandler(dynamicHandler);
+        commandLog.addHandler(dynamicHandler);
         dynamicHandler.setFormatter(new LogFormat());
 
         // Set up the commands manager
         ParametricBuilder builder = new ParametricBuilder();
         builder.setAuthorizer(new ActorAuthorizer());
+        builder.setDefaultCompleter(new UserCommandCompleter(platformManager));
         builder.addBinding(new WorldEditBinding(worldEdit));
         builder.addExceptionConverter(new WorldEditExceptionConverter(worldEdit));
         builder.addInvokeListener(new LegacyCommandsHandler());
-        builder.addInvokeListener(new CommandLoggingHandler(worldEdit, logger));
+        builder.addInvokeListener(new CommandLoggingHandler(worldEdit, commandLog));
 
         dispatcher = new CommandGraph()
                 .builder(builder)
@@ -163,7 +166,7 @@ public final class CommandManager {
     }
 
     void register(Platform platform) {
-        logger.log(Level.FINE, "Registering commands with " + platform.getClass().getCanonicalName());
+        log.log(Level.FINE, "Registering commands with " + platform.getClass().getCanonicalName());
 
         LocalConfiguration config = platform.getConfiguration();
         boolean logging = config.logCommands;
@@ -172,18 +175,17 @@ public final class CommandManager {
         // Register log
         if (!logging || path.isEmpty()) {
             dynamicHandler.setHandler(null);
-            logger.setLevel(Level.OFF);
+            commandLog.setLevel(Level.OFF);
         } else {
             File file = new File(config.getWorkingDirectory(), path);
+            commandLog.setLevel(Level.ALL);
 
-            logger.setLevel(Level.ALL);
-
-            logger.log(Level.INFO, "Logging WorldEdit commands to " + file.getAbsolutePath());
+            log.log(Level.INFO, "Logging WorldEdit commands to " + file.getAbsolutePath());
 
             try {
                 dynamicHandler.setHandler(new FileHandler(file.getAbsolutePath(), true));
             } catch (IOException e) {
-                logger.log(Level.WARNING, "Could not use command log file " + path + ": " + e.getMessage());
+                log.log(Level.WARNING, "Could not use command log file " + path + ": " + e.getMessage());
             }
         }
 
@@ -261,9 +263,15 @@ public final class CommandManager {
             Throwable t = e.getCause();
             actor.printError("Please report this error: [See console]");
             actor.printRaw(t.getClass().getName() + ": " + t.getMessage());
-            t.printStackTrace();
+            log.log(Level.SEVERE, "An unexpected error while handling a WorldEdit command", t);
         } catch (CommandException e) {
-            actor.printError(e.getMessage());
+            String message = e.getMessage();
+            if (message != null) {
+                actor.printError(e.getMessage());
+            } else {
+                actor.printError("An unknown error has occurred! Please see console.");
+                log.log(Level.SEVERE, "An unknown error occurred", e);
+            }
         } finally {
             EditSession editSession = locals.get(EditSession.class);
 
@@ -312,7 +320,7 @@ public final class CommandManager {
     }
 
     public static Logger getLogger() {
-        return logger;
+        return commandLog;
     }
 
 }

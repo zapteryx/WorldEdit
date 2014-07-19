@@ -38,11 +38,20 @@ import com.sk89q.worldedit.internal.cui.SelectionShapeEvent;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
+import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.session.request.Request;
+import com.sk89q.worldedit.util.formatting.ColorCodeBuilder;
+import com.sk89q.worldedit.util.formatting.Style;
+import com.sk89q.worldedit.util.formatting.StyledFragment;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
 
-import java.util.*;
+import javax.annotation.Nullable;
+import java.util.Calendar;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.TimeZone;
 
 /**
  * An instance of this represents the WorldEdit session of a user. A session
@@ -52,6 +61,9 @@ import java.util.*;
  * @author sk89q
  */
 public class LocalSession {
+
+    private static final boolean SHOW_HELP_MESSAGE = false;
+
     public static int MAX_HISTORY_SIZE = 15;
     public static int EXPIRATION_GRACE = 600000;
 
@@ -62,7 +74,7 @@ public class LocalSession {
     private boolean placeAtPos1 = false;
     private LinkedList<EditSession> history = new LinkedList<EditSession>();
     private int historyPointer = 0;
-    private CuboidClipboard clipboard;
+    private ClipboardHolder clipboard;
     private boolean toolControl = true;
     private boolean superPickaxe = false;
     private BlockTool pickaxeMode = new SinglePickaxe();
@@ -324,9 +336,9 @@ public class LocalSession {
      * Gets the clipboard.
      *
      * @return clipboard, may be null
-     * @throws EmptyClipboardException
+     * @throws EmptyClipboardException thrown if no clipboard is set
      */
-    public CuboidClipboard getClipboard() throws EmptyClipboardException {
+    public ClipboardHolder getClipboard() throws EmptyClipboardException {
         if (clipboard == null) {
             throw new EmptyClipboardException();
         }
@@ -336,9 +348,11 @@ public class LocalSession {
     /**
      * Sets the clipboard.
      *
-     * @param clipboard
+     * <p>Pass {@code null} to clear the clipboard.</p>
+     *
+     * @param clipboard the clipboard, or null if the clipboard is to be cleared
      */
-    public void setClipboard(CuboidClipboard clipboard) {
+    public void setClipboard(@Nullable ClipboardHolder clipboard) {
         this.clipboard = clipboard;
     }
 
@@ -573,11 +587,13 @@ public class LocalSession {
      *
      * @param player
      */
+    @SuppressWarnings({"PointlessBooleanExpression", "ConstantConditions"})
     public void tellVersion(Actor player) {
-        if (config.showFirstUseVersion) {
+        if (config.showHelpInfo && SHOW_HELP_MESSAGE) {
             if (!beenToldVersion) {
-                player.printRaw("\u00A78WorldEdit ver. " + WorldEdit.getVersion()
-                        + " (http://sk89q.com/projects/worldedit/)");
+                StyledFragment fragment = new StyledFragment(Style.GRAY_DARK);
+                fragment.append("Need help with WorldEdit? Ask us on IRC (irc.esper.net #sk89q) or on our forums @ http://forum.enginehub.org");
+                player.printRaw(ColorCodeBuilder.asColorCodes(fragment));
                 beenToldVersion = true;
             }
         }

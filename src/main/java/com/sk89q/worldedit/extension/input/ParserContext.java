@@ -20,8 +20,8 @@
 package com.sk89q.worldedit.extension.input;
 
 import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.extension.factory.MaskFactory;
 import com.sk89q.worldedit.extension.platform.Actor;
-import com.sk89q.worldedit.extension.registry.MaskRegistry;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.world.World;
 
@@ -29,7 +29,7 @@ import javax.annotation.Nullable;
 
 /**
  * Contains contextual information that may be useful when constructing
- * objects from a registry (such as {@link MaskRegistry}).
+ * objects from a registry (such as {@link MaskFactory}).
  * </p>
  * By default, {@link #isRestricted()} will return true.
  */
@@ -41,6 +41,26 @@ public class ParserContext {
     private @Nullable Actor actor;
     private boolean restricted = true;
     private boolean preferringWildcard;
+
+    /**
+     * Create a new instance.
+     */
+    public ParserContext() {
+    }
+
+    /**
+     * Creates a copy of another instance.
+     *
+     * @param other the other instance
+     */
+    public ParserContext(ParserContext other) {
+        setExtent(other.getExtent());
+        setSession(other.getSession());
+        setWorld(other.getWorld());
+        setActor(other.getActor());
+        setRestricted(other.isRestricted());
+        setPreferringWildcard(other.isPreferringWildcard());
+    }
 
     /**
      * Get the {@link Extent} set on this context.
@@ -94,6 +114,7 @@ public class ParserContext {
      */
     public void setWorld(@Nullable World world) {
         this.world = world;
+        setExtent(world);
     }
 
     /**

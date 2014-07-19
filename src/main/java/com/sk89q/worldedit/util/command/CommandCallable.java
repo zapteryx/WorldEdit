@@ -22,12 +22,10 @@ package com.sk89q.worldedit.util.command;
 import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandLocals;
 
-import java.util.List;
-
 /**
  * A command that can be executed.
  */
-public interface CommandCallable {
+public interface CommandCallable extends CommandCompleter {
 
     /**
      * Execute the correct command based on the input.
@@ -41,16 +39,6 @@ public interface CommandCallable {
      * @throws CommandException thrown on a command error
      */
     boolean call(String arguments, CommandLocals locals, String[] parentCommands) throws CommandException;
-
-    /**
-     * Get a list of suggestions based on input.
-     *
-     * @param arguments the arguments entered up to this point
-     * @param locals the locals
-     * @return a list of suggestions
-     * @throws CommandException thrown if there was a parsing error
-     */
-    List<String> getSuggestions(String arguments, CommandLocals locals) throws CommandException;
     
     /**
      * Get an object describing this command.

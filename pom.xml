@@ -142,6 +142,22 @@
       <type>jar</type>
     </dependency>
 
+    <!-- JSON parser -->
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.2.4</version>
+      <optional>true</optional>
+    </dependency>
+
+    <!-- Optimized collections -->
+    <dependency>
+      <groupId>net.sf.trove4j</groupId>
+      <artifactId>trove4j</artifactId>
+      <version>3.0.3</version>
+      <optional>true</optional>
+    </dependency>
+
     <!-- @Nullable etc. -->
     <dependency>
       <groupId>com.google.code.findbugs</groupId>
@@ -186,8 +202,17 @@
   <build>
     <defaultGoal>install</defaultGoal>
     <sourceDirectory>${basedir}/src/main/java/</sourceDirectory>
-    
+
     <resources>
+      <!-- Data files -->
+      <resource>
+        <targetPath>.</targetPath>
+        <filtering>false</filtering>
+        <directory>${basedir}/src/main/resources/</directory>
+        <includes>
+          <include>**/*.json</include>
+        </includes>
+      </resource>
       <!-- Language files -->
       <resource>
         <directory>src/main/resources</directory>
@@ -324,26 +349,6 @@
         </configuration>
       </plugin>
 
-      <!-- Stores parameter information -->
-      <plugin>
-        <groupId>com.thoughtworks.paranamer</groupId>
-        <artifactId>paranamer-maven-plugin-largestack</artifactId>
-        <version>2.5.5-SNAPSHOT</version>
-        <executions>
-          <execution>
-            <id>run</id>
-            <phase>compile</phase>
-            <configuration>
-              <sourceDirectory>${project.build.sourceDirectory}</sourceDirectory>
-              <outputDirectory>${project.build.outputDirectory}</outputDirectory>
-            </configuration>
-            <goals>
-              <goal>generate</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
       <!-- JAR plugin -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -378,12 +383,25 @@
               <goal>shade</goal>
             </goals>
             <configuration>
+              <minimizeJar>true</minimizeJar>
               <artifactSet>
                 <includes>
                   <include>com.sk89q:jchronic</include>
                   <include>com.thoughtworks.paranamer:paranamer</include>
+                  <include>com.google.code.gson:gson</include>
+                  <include>net.sf.trove4j:trove4j</include>
                 </includes>
               </artifactSet>
+              <relocations>
+                <relocation>
+                  <pattern>gnu.trove</pattern>
+                  <shadedPattern>com.sk89q.worldedit.internal.trove</shadedPattern>
+                </relocation>
+                <relocation>
+                  <pattern>com.google.gson</pattern>
+                  <shadedPattern>com.sk89q.worldedit.internal.gson</shadedPattern>
+                </relocation>
+              </relocations>
             </configuration>
           </execution>
         </executions>
@@ -503,21 +521,23 @@
           <optional>true</optional>
         </dependency>
 
+        <!-- Used for running CraftBukkit from within your IDE
+             These are runtime-only dependencies -->
+        <dependency>
+          <groupId>org.sk89q.bukkit</groupId>
+          <artifactId>bukkit-classloader-check</artifactId>
+          <version>1.7.2-R0.3</version>
+          <scope>runtime</scope>
+          <type>jar</type>
+          <optional>true</optional>
+        </dependency>
+        <!-- End runtime only -->
+
         <!-- Bukkit implementation -->
         <dependency>
           <groupId>org.bukkit</groupId>
           <artifactId>bukkit</artifactId>
-          <version>1.7.2-R0.2</version>
-          <scope>compile</scope>
-          <type>jar</type>
-          <optional>true</optional>
-        </dependency>
-
-        <!-- NMS blocks -->
-        <dependency>
-          <groupId>org.bukkit</groupId>
-          <artifactId>craftbukkit</artifactId>
-          <version>1.7.9-R0.1-SNAPSHOT</version>
+          <version>1.7.2-R0.3</version>
           <scope>compile</scope>
           <type>jar</type>
           <optional>true</optional>
@@ -548,11 +568,11 @@
 
           <!-- NMS support in Bukkit -->
           <resource>
-            <targetPath>nmsblocks/</targetPath>
+            <targetPath>.</targetPath>
             <filtering>false</filtering>
-            <directory>${basedir}/src/bukkit/resources/nmsblocks/</directory>
+            <directory>${basedir}/src/bukkit/resources/</directory>
             <includes>
-              <include>*.class</include>
+              <include>**/*.class</include>
             </includes>
           </resource>
         </resources>
@@ -628,71 +648,6 @@
                 <goals>
                   <goal>jar</goal>
                 </goals>
-              </execution>
-            </executions>
-          </plugin>
-        </plugins>
-      </build>
-    </profile>
-
-    <!--
-    =====================================
-      Spout (BROKEN)
-    =====================================
-    -->
-    <profile>
-      <id>spout</id>
-
-      <repositories>
-        <repository> <!-- WARNING: This breaks all the time -->
-          <id>spout-repo</id>
-          <url>http://nexus.spout.org/content/groups/public/</url>
-        </repository>
-      </repositories>
-
-      <dependencies>
-        <dependency>
-          <groupId>org.spout</groupId>
-          <artifactId>spoutapi</artifactId>
-          <version>dev-SNAPSHOT</version> <!-- WARNING: This breaks all the time -->
-          <optional>true</optional>
-        </dependency>
-        <dependency>
-          <groupId>org.spout</groupId>
-          <artifactId>vanilla</artifactId>
-          <version>1.4.7-SNAPSHOT</version> <!-- WARNING: This breaks all the time -->
-          <optional>true</optional>
-        </dependency>
-      </dependencies>
-
-      <build>
-        <resources>
-          <resource>
-            <targetPath>.</targetPath>
-            <filtering>true</filtering>
-            <directory>${basedir}/src/spout/resources/</directory>
-            <includes>
-              <include>properties.yml</include>
-            </includes>
-          </resource>
-        </resources>
-        <plugins>
-          <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>build-helper-maven-plugin</artifactId>
-            <version>1.5</version>
-            <executions>
-              <execution>
-                <id>add-spout-sources</id>
-                <phase>generate-sources</phase>
-                <goals>
-                  <goal>add-source</goal>
-                </goals>
-                <configuration>
-                  <sources>
-                    <source>${basedir}/src/spout/java</source>
-                  </sources>
-                </configuration>
               </execution>
             </executions>
           </plugin>

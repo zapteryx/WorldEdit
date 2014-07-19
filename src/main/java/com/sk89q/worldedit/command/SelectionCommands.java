@@ -19,23 +19,12 @@
 
 package com.sk89q.worldedit.command;
 
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.POSITION;
-import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-
 import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandAlias;
 import com.sk89q.minecraft.util.commands.CommandContext;
+import com.sk89q.minecraft.util.commands.CommandException;
 import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.minecraft.util.commands.Logging;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.util.Countable;
-import com.sk89q.worldedit.CuboidClipboard;
 import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalPlayer;
 import com.sk89q.worldedit.LocalSession;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.Vector2D;
@@ -43,18 +32,29 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockType;
-import com.sk89q.worldedit.world.World;
-import com.sk89q.worldedit.world.storage.ChunkStore;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extent.clipboard.Clipboard;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.regions.RegionOperationException;
+import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.ConvexPolyhedralRegionSelector;
 import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.selector.CylinderRegionSelector;
 import com.sk89q.worldedit.regions.selector.EllipsoidRegionSelector;
 import com.sk89q.worldedit.regions.selector.ExtendingCuboidRegionSelector;
 import com.sk89q.worldedit.regions.selector.Polygonal2DRegionSelector;
-import com.sk89q.worldedit.regions.Region;
-import com.sk89q.worldedit.regions.RegionOperationException;
-import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldedit.regions.selector.SphereRegionSelector;
+import com.sk89q.worldedit.session.ClipboardHolder;
+import com.sk89q.worldedit.util.Countable;
+import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.storage.ChunkStore;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+
+import static com.sk89q.minecraft.util.commands.Logging.LogMode.POSITION;
+import static com.sk89q.minecraft.util.commands.Logging.LogMode.REGION;
 
 /**
  * Selection commands.
@@ -584,15 +584,16 @@ public class SelectionCommands {
     public void size(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
         
         if (args.hasFlag('c')) {
-            CuboidClipboard clipboard = session.getClipboard();
-            Vector size = clipboard.getSize();
-            Vector offset = clipboard.getOffset();
+            ClipboardHolder holder = session.getClipboard();
+            Clipboard clipboard = holder.getClipboard();
+            Region region = clipboard.getRegion();
+            Vector size = region.getMaximumPoint().subtract(region.getMinimumPoint());
+            Vector origin = clipboard.getOrigin();
 
-            player.print("Size: " + size);
-            player.print("Offset: " + offset);
+            player.print("Cuboid dimensions (max - min): " + size);
+            player.print("Offset: " + origin);
             player.print("Cuboid distance: " + size.distance(Vector.ONE));
-            player.print("# of blocks: " 
-                         + (int) (size.getX() * size.getY() * size.getZ()));
+            player.print("# of blocks: " + (int) (size.getX() * size.getY() * size.getZ()));
             return;
         }
         
@@ -610,8 +611,7 @@ public class SelectionCommands {
         }
         
         player.print("Size: " + size);
-        player.print("Cuboid distance: " + region.getMaximumPoint()
-                .distance(region.getMinimumPoint()));
+        player.print("Cuboid distance: " + region.getMaximumPoint().distance(region.getMinimumPoint()));
         player.print("# of blocks: " + region.getArea());
     }
 
@@ -655,7 +655,7 @@ public class SelectionCommands {
         max = 0
     )
     @CommandPermissions("worldedit.analysis.distr")
-    public void distr(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException {
+    public void distr(Player player, LocalSession session, EditSession editSession, CommandContext args) throws WorldEditException, CommandException {
 
         int size;
         boolean useData = args.hasFlag('d');
@@ -663,13 +663,8 @@ public class SelectionCommands {
         List<Countable<BaseBlock>> distributionData = null;
 
         if (args.hasFlag('c')) {
-            CuboidClipboard clip = session.getClipboard();
-            if (useData) {
-                distributionData = clip.getBlockDistributionWithData();
-            } else {
-                distribution = clip.getBlockDistribution();
-            }
-            size = clip.getHeight() * clip.getLength() * clip.getWidth(); 
+            // TODO: Update for new clipboard
+            throw new CommandException("Needs to be re-written again");
         } else {
             if (useData) {
                 distributionData = editSession.getBlockDistributionWithData(session.getSelection(player.getWorld()));
@@ -710,7 +705,7 @@ public class SelectionCommands {
     }
 
     @Command(
-        aliases = { "/sel", ";" },
+        aliases = { "/sel", ";", "/desel", "/deselect" },
         usage = "[cuboid|extend|poly|ellipsoid|sphere|cyl|convex]",
         desc = "Choose a region selector",
         min = 0,
@@ -765,9 +760,4 @@ public class SelectionCommands {
         session.dispatchCUISelection(player);
     }
 
-    @Command(aliases = {"/desel", "/deselect"}, desc = "Deselect the current selection")
-    @CommandAlias("/sel")
-    public void deselect() {
-
-    }
 }

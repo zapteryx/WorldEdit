@@ -22,7 +22,16 @@ package com.sk89q.worldedit.bukkit;
 import com.google.common.base.Joiner;
 import com.sk89q.util.yaml.YAMLProcessor;
 import com.sk89q.wepif.PermissionsResolverManager;
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalPlayer;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.ServerInterface;
+import com.sk89q.worldedit.WorldEdit;
+import com.sk89q.worldedit.WorldEditOperation;
+import com.sk89q.worldedit.bukkit.adapter.AdapterLoadException;
+import com.sk89q.worldedit.bukkit.adapter.BukkitImplAdapter;
+import com.sk89q.worldedit.bukkit.adapter.BukkitImplLoader;
 import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.CylinderSelection;
 import com.sk89q.worldedit.bukkit.selections.Polygonal2DSelection;
@@ -31,8 +40,14 @@ import com.sk89q.worldedit.event.platform.CommandEvent;
 import com.sk89q.worldedit.event.platform.CommandSuggestionEvent;
 import com.sk89q.worldedit.event.platform.PlatformReadyEvent;
 import com.sk89q.worldedit.extension.platform.Actor;
+import com.sk89q.worldedit.extension.platform.Capability;
+import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.regions.*;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.CylinderRegion;
+import com.sk89q.worldedit.regions.Polygonal2DRegion;
+import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.regions.RegionSelector;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -40,12 +55,19 @@ import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.*;
-import java.util.Enumeration;
+import javax.annotation.Nullable;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
-import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Plugin for Bukkit.
@@ -54,27 +76,13 @@ import java.util.zip.ZipEntry;
  */
 public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
 
-    /**
-     * The name of the CUI's plugin channel registration
-     */
+    private static final Logger log = Logger.getLogger(WorldEditPlugin.class.getCanonicalName());
     public static final String CUI_PLUGIN_CHANNEL = "WECUI";
+    private static WorldEditPlugin INSTANCE;
 
-    /**
-     * The server interface that all server-related API goes through.
-     */
+    private BukkitImplAdapter bukkitAdapter;
     private BukkitServerInterface server;
-    /**
-     * Main WorldEdit instance.
-     */
-    private WorldEdit controller;
-    /**
-     * Deprecated API.
-     */
-    private WorldEditAPI api;
-
-    /**
-     * Holds the configuration for WorldEdit.
-     */
+    private final WorldEditAPI api = new WorldEditAPI(this);
     private BukkitConfiguration config;
 
     /**
@@ -82,73 +90,74 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      */
     @Override
     public void onEnable() {
-        final String pluginYmlVersion = getDescription().getVersion();
-        final String manifestVersion = WorldEdit.getVersion();
+        this.INSTANCE = this;
 
-        if (!manifestVersion.equalsIgnoreCase(pluginYmlVersion)) {
-            WorldEdit.setVersion(manifestVersion + " (" + pluginYmlVersion + ")");
-        }
-
-        // Make the data folders that WorldEdit uses
         getDataFolder().mkdirs();
-        File targetDir = new File(getDataFolder() + File.separator + "nmsblocks");
-        targetDir.mkdir();
-        copyNmsBlockClasses(targetDir);
 
-        // Create the default configuration file
-        createDefaultConfiguration("config.yml");
+        WorldEdit worldEdit = WorldEdit.getInstance();
 
-        // Set up configuration and such, including the permissions
-        // resolver
-        config = new BukkitConfiguration(new YAMLProcessor(new File(getDataFolder(), "config.yml"), true), this);
-        PermissionsResolverManager.initialize(this);
+        loadConfig(); // Load configuration
+        PermissionsResolverManager.initialize(this); // Setup permission resolver
 
-        // Load the configuration
-        config.load();
-
-        // Setup interfaces
+        // Setup platform
         server = new BukkitServerInterface(this, getServer());
-        controller = WorldEdit.getInstance();
-        controller.getPlatformManager().register(server);
-        api = new WorldEditAPI(this);
+        worldEdit.getPlatformManager().register(server);
+
+        // Register CUI
         getServer().getMessenger().registerIncomingPluginChannel(this, CUI_PLUGIN_CHANNEL, new CUIChannelListener(this));
         getServer().getMessenger().registerOutgoingPluginChannel(this, CUI_PLUGIN_CHANNEL);
-        // Now we can register events!
+
+        // Now we can register events
         getServer().getPluginManager().registerEvents(new WorldEditListener(this), this);
 
-        getServer().getScheduler().runTaskTimerAsynchronously(this, new SessionTimer(controller, getServer()), 120, 120);
+        // Register session timer
+        getServer().getScheduler().runTaskTimerAsynchronously(this, new SessionTimer(worldEdit, getServer()), 120, 120);
 
         // If we are on MCPC+/Cauldron, then Forge will have already loaded
         // Forge WorldEdit and there's (probably) not going to be any other
         // platforms to be worried about... at the current time of writing
         WorldEdit.getInstance().getEventBus().post(new PlatformReadyEvent());
+
+        loadAdapter(); // Need an adapter to work with special blocks with NBT data
     }
 
-    private void copyNmsBlockClasses(File target) {
+    private void loadConfig() {
+        createDefaultConfiguration("config.yml"); // Create the default configuration file
+
+        config = new BukkitConfiguration(new YAMLProcessor(new File(getDataFolder(), "config.yml"), true), this);
+        config.load();
+    }
+
+    private void loadAdapter() {
+        WorldEdit worldEdit = WorldEdit.getInstance();
+
+        // Attempt to load a Bukkit adapter
+        BukkitImplLoader adapterLoader = new BukkitImplLoader();
+
         try {
-            JarFile jar = new JarFile(getFile());
-            @SuppressWarnings("rawtypes")
-            Enumeration entries = jar.entries();
-            while (entries.hasMoreElements()) {
-                JarEntry jarEntry = (JarEntry) entries.nextElement();
-                if (!jarEntry.getName().startsWith("nmsblocks") || jarEntry.isDirectory()) continue;
+            adapterLoader.addFromPath(getClass().getClassLoader());
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Failed to search path for Bukkit adapters");
+        }
 
-                File file = new File(target + File.separator + jarEntry.getName().replace("nmsblocks", ""));
-                if (file.exists()) continue;
-
-                InputStream is = jar.getInputStream(jarEntry);
-                FileOutputStream fos = new FileOutputStream(file);
-
-                fos = new FileOutputStream(file);
-                byte[] buf = new byte[8192];
-                int length = 0;
-                while ((length = is.read(buf)) > 0) {
-                    fos.write(buf, 0, length);
-                }
-                fos.close();
-                is.close();
+        try {
+            adapterLoader.addFromJar(getFile());
+        } catch (IOException e) {
+            log.log(Level.WARNING, "Failed to search " + getFile() + " for Bukkit adapters", e);
+        }
+        try {
+            bukkitAdapter = adapterLoader.loadAdapter();
+            log.log(Level.INFO, "Using " + bukkitAdapter.getClass().getCanonicalName() + " as the Bukkit adapter");
+        } catch (AdapterLoadException e) {
+            Platform platform = worldEdit.getPlatformManager().queryCapability(Capability.WORLD_EDITING);
+            if (platform instanceof BukkitServerInterface) {
+                log.log(Level.WARNING, e.getMessage());
+            } else {
+                log.log(Level.INFO, "WorldEdit could not find a Bukkit adapter for this MC version, " +
+                        "but it seems that you have another implementation of WorldEdit installed (" + platform.getPlatformName() + ") " +
+                        "that handles the world editing.");
             }
-        } catch (Throwable e) {}
+        }
     }
 
     /**
@@ -156,10 +165,13 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      */
     @Override
     public void onDisable() {
-        if (controller != null) {
-            controller.clearSessions();
-            controller.getPlatformManager().unregister(server);
+        WorldEdit worldEdit = WorldEdit.getInstance();
+        worldEdit.clearSessions();
+        worldEdit.getPlatformManager().unregister(server);
+        if (config != null) {
             config.unload();
+        }
+        if (server != null) {
             server.unregisterCommands();
         }
         this.getServer().getScheduler().cancelTasks(this);
@@ -177,7 +189,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
     /**
      * Create a default configuration file from the .jar.
      *
-     * @param name
+     * @param name the filename
      */
     protected void createDefaultConfiguration(String name) {
         File actual = new File(getDataFolder(), name);
@@ -257,7 +269,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      * @return
      */
     public LocalSession getSession(Player player) {
-        return controller.getSession(wrapPlayer(player));
+        return WorldEdit.getInstance().getSession(wrapPlayer(player));
     }
 
     /**
@@ -268,10 +280,10 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      */
     public EditSession createEditSession(Player player) {
         LocalPlayer wePlayer = wrapPlayer(player);
-        LocalSession session = controller.getSession(wePlayer);
+        LocalSession session = WorldEdit.getInstance().getSession(wePlayer);
         BlockBag blockBag = session.getBlockBag(wePlayer);
 
-        EditSession editSession = controller.getEditSessionFactory()
+        EditSession editSession = WorldEdit.getInstance().getEditSessionFactory()
                 .getEditSession(wePlayer.getWorld(), session.getBlockChangeLimit(), blockBag, wePlayer);
         editSession.enableQueue();
 
@@ -286,12 +298,12 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      */
     public void remember(Player player, EditSession editSession) {
         LocalPlayer wePlayer = wrapPlayer(player);
-        LocalSession session = controller.getSession(wePlayer);
+        LocalSession session = WorldEdit.getInstance().getSession(wePlayer);
 
         session.remember(editSession);
         editSession.flushQueue();
 
-        controller.flushBlockBag(wePlayer, editSession);
+        WorldEdit.getInstance().flushBlockBag(wePlayer, editSession);
     }
 
     /**
@@ -301,10 +313,9 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      * @param op
      * @throws Throwable
      */
-    public void perform(Player player, WorldEditOperation op)
-            throws Throwable {
+    public void perform(Player player, WorldEditOperation op) throws Throwable {
         LocalPlayer wePlayer = wrapPlayer(player);
-        LocalSession session = controller.getSession(wePlayer);
+        LocalSession session = WorldEdit.getInstance().getSession(wePlayer);
 
         EditSession editSession = createEditSession(player);
         try {
@@ -379,7 +390,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      * @return
      */
     public WorldEdit getWorldEdit() {
-        return controller;
+        return WorldEdit.getInstance();
     }
 
     /**
@@ -396,7 +407,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
             throw new IllegalArgumentException("Offline player not allowed");
         }
 
-        LocalSession session = controller.getSession(wrapPlayer(player));
+        LocalSession session = WorldEdit.getInstance().getSession(wrapPlayer(player));
         RegionSelector selector = session.getRegionSelector(BukkitUtil.getLocalWorld(player.getWorld()));
 
         try {
@@ -434,9 +445,30 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
             throw new IllegalArgumentException("Null selection not allowed");
         }
 
-        LocalSession session = controller.getSession(wrapPlayer(player));
+        LocalSession session = WorldEdit.getInstance().getSession(wrapPlayer(player));
         RegionSelector sel = selection.getRegionSelector();
         session.setRegionSelector(BukkitUtil.getLocalWorld(player.getWorld()), sel);
         session.dispatchCUISelection(wrapPlayer(player));
     }
+
+    /**
+     * Gets the instance of this plugin.
+     *
+     * @return an instance of the plugin
+     * @throws NullPointerException if the plugin hasn't been enabled
+     */
+    static WorldEditPlugin getInstance() {
+        return checkNotNull(INSTANCE);
+    }
+
+    /**
+     * Get the Bukkit implementation adapter.
+     *
+     * @return the adapter
+     */
+    @Nullable
+    BukkitImplAdapter getBukkitImplAdapter() {
+        return bukkitAdapter;
+    }
+
 }

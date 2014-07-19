@@ -21,10 +21,14 @@ package com.sk89q.worldedit.extension.platform;
 
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldVector;
+import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
+import com.sk89q.worldedit.internal.cui.CUIEvent;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
+
+import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,14 +36,17 @@ class PlayerProxy extends AbstractPlayerActor {
 
     private final Player basePlayer;
     private final Actor permActor;
+    private final Actor cuiActor;
     private final World world;
 
-    PlayerProxy(Player basePlayer, Actor permActor, World world) {
+    PlayerProxy(Player basePlayer, Actor permActor, Actor cuiActor, World world) {
         checkNotNull(basePlayer);
         checkNotNull(permActor);
+        checkNotNull(cuiActor);
         checkNotNull(world);
         this.basePlayer = basePlayer;
         this.permActor = permActor;
+        this.cuiActor = cuiActor;
         this.world = world;
     }
 
@@ -61,6 +68,11 @@ class PlayerProxy extends AbstractPlayerActor {
     @Override
     public String getName() {
         return basePlayer.getName();
+    }
+
+    @Override
+    public BaseEntity getState() {
+        throw new UnsupportedOperationException("Can't getState() on a player");
     }
 
     @Override
@@ -121,5 +133,16 @@ class PlayerProxy extends AbstractPlayerActor {
     @Override
     public boolean hasPermission(String perm) {
         return permActor.hasPermission(perm);
+    }
+
+    @Override
+    public void dispatchCUIEvent(CUIEvent event) {
+        cuiActor.dispatchCUIEvent(event);
+    }
+
+    @Nullable
+    @Override
+    public <T> T getFacet(Class<? extends T> cls) {
+        return basePlayer.getFacet(cls);
     }
 }

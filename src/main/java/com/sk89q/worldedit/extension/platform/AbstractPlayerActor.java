@@ -33,6 +33,7 @@ import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.blocks.ItemID;
 import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
 import com.sk89q.worldedit.util.TargetBlock;
 import com.sk89q.worldedit.world.World;
@@ -45,7 +46,12 @@ import java.util.Locale;
  * that is intended for implementations of WorldEdit to use to wrap
  * players that make use of WorldEdit.
  */
-public abstract class AbstractPlayerActor implements Actor, Player {
+public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
+
+    @Override
+    public final Extent getExtent() {
+        return getWorld();
+    }
 
     @Override
     public Locale getLocale() {
@@ -477,6 +483,17 @@ public abstract class AbstractPlayerActor implements Actor, Player {
 
     @Override
     public boolean hasCreativeMode() {
+        return false;
+    }
+
+    @SuppressWarnings("CloneDoesntCallSuperClone")
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        throw new CloneNotSupportedException("Not supported");
+    }
+
+    @Override
+    public boolean remove() {
         return false;
     }
 
