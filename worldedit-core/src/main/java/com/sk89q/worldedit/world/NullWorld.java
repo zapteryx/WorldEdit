@@ -29,7 +29,6 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator.TreeType;
 import com.sk89q.worldedit.world.biome.BaseBiome;
-import com.sk89q.worldedit.world.registry.LegacyWorldData;
 import com.sk89q.worldedit.world.registry.WorldData;
 
 import javax.annotation.Nullable;
@@ -98,7 +97,8 @@ public class NullWorld extends AbstractWorld {
 
     @Override
     public WorldData getWorldData() {
-        return LegacyWorldData.getInstance();
+        // TODO
+        return null;
     }
 
     @Override

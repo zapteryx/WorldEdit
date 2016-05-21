@@ -58,7 +58,7 @@ public abstract class AbstractWorld implements World {
         try {
             setBlock(
                     position,
-                    WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(getLazyBlock(position).getType(), data)
+                    WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(getLazyBlock(position).getId(), data)
             );
         } catch (WorldEditException ignored) {
         }
@@ -85,7 +85,7 @@ public abstract class AbstractWorld implements World {
 
     @Override
     public boolean isValidBlockType(int type) {
-        return BlockType.fromID(type) != null;
+        return getWorldData().getBlockRegistry().hasEntry(type);
     }
 
     @Override
@@ -106,7 +106,7 @@ public abstract class AbstractWorld implements World {
 
     @Override
     public int getBlockType(Vector pt) {
-        return getLazyBlock(pt).getType();
+        return getLazyBlock(pt).getId();
     }
 
     @Override
@@ -129,7 +129,7 @@ public abstract class AbstractWorld implements World {
         if (stack != null) {
             final int amount = stack.getAmount();
             if (amount > 1) {
-                dropItem(pt, new BaseItemStack(stack.getType(), 1, stack.getData()), amount);
+                dropItem(pt, new BaseItemStack(stack.getId(), 1, stack.getData()), amount);
             } else {
                 dropItem(pt, stack, amount);
             }

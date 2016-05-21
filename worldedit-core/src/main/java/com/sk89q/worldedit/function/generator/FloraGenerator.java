@@ -107,10 +107,10 @@ public class FloraGenerator implements RegionFunction {
     public boolean apply(Vector position) throws WorldEditException {
         BaseBlock block = editSession.getBlock(position);
 
-        if (block.getType() == BlockID.GRASS) {
+        if (block.getId() == BlockID.GRASS) {
             editSession.setBlock(position.add(0, 1, 0), temperatePattern.apply(position));
             return true;
-        } else if (block.getType() == BlockID.SAND) {
+        } else if (block.getId() == BlockID.SAND) {
             editSession.setBlock(position.add(0, 1, 0), desertPattern.apply(position));
             return true;
         }

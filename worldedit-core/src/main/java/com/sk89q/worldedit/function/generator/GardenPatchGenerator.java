@@ -156,11 +156,11 @@ public class GardenPatchGenerator implements RegionFunction {
 
     @Override
     public boolean apply(Vector position) throws WorldEditException {
-        if (editSession.getBlock(position).getType() != BlockID.AIR) {
+        if (editSession.getBlock(position).getId() != BlockID.AIR) {
             position = position.add(0, 1, 0);
         }
 
-        if (editSession.getBlock(position.add(0, -1, 0)).getType() != BlockID.GRASS) {
+        if (editSession.getBlock(position.add(0, -1, 0)).getId() != BlockID.GRASS) {
             return false;
         }
 

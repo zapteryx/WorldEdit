@@ -21,7 +21,10 @@ package com.sk89q.worldedit.regions.selector;
 
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.extension.platform.Actor;
-import com.sk89q.worldedit.internal.cui.*;
+import com.sk89q.worldedit.internal.cui.CUIRegion;
+import com.sk89q.worldedit.internal.cui.SelectionCylinderEvent;
+import com.sk89q.worldedit.internal.cui.SelectionMinMaxEvent;
+import com.sk89q.worldedit.internal.cui.SelectionPointEvent;
 import com.sk89q.worldedit.regions.CylinderRegion;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionSelector;
@@ -38,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Creates a {@code CylinderRegionSelector} from a user's selections.
  */
-public class CylinderRegionSelector extends com.sk89q.worldedit.regions.CylinderRegionSelector implements RegionSelector, CUIRegion {
+public class CylinderRegionSelector implements RegionSelector, CUIRegion {
 
     protected static transient final NumberFormat NUMBER_FORMAT;
     protected transient CylinderRegion region;

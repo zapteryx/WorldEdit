@@ -19,11 +19,7 @@
 
 package com.sk89q.worldedit.command.tool;
 
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.MaxChangedBlocksException;
-import com.sk89q.worldedit.WorldVector;
+import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.command.tool.brush.Brush;
 import com.sk89q.worldedit.command.tool.brush.SphereBrush;
 import com.sk89q.worldedit.entity.Player;
@@ -162,8 +158,7 @@ public class BrushTool implements TraceTool {
 
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
-        WorldVector target = null;
-        target = player.getBlockTrace(getRange(), true);
+        BlockVector target = player.getBlockTrace(getRange(), true);
 
         if (target == null) {
             player.printError("No block in sight!");

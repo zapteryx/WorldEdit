@@ -26,8 +26,8 @@ import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.function.LayerFunction;
-import com.sk89q.worldedit.masks.BlockMask;
-import com.sk89q.worldedit.masks.Mask;
+import com.sk89q.worldedit.function.mask.BlockMask;
+import com.sk89q.worldedit.function.mask.Mask;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -41,9 +41,9 @@ public class Naturalizer implements LayerFunction {
     private static final BaseBlock GRASS = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.GRASS);
     private static final BaseBlock DIRT = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.DIRT);
     private static final BaseBlock STONE = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.STONE);
-    private static final Mask mask = new BlockMask(GRASS, DIRT, STONE);
 
     private final EditSession editSession;
+    private final Mask mask;
     private int affected = 0;
 
     /**
@@ -54,6 +54,7 @@ public class Naturalizer implements LayerFunction {
     public Naturalizer(EditSession editSession) {
         checkNotNull(editSession);
         this.editSession = editSession;
+        this.mask = new BlockMask(editSession.getWorld(), GRASS, DIRT, STONE);
     }
 
     /**
@@ -67,12 +68,12 @@ public class Naturalizer implements LayerFunction {
 
     @Override
     public boolean isGround(Vector position) {
-        return mask.matches(editSession, position);
+        return mask.test(position);
     }
 
     @Override
     public boolean apply(Vector position, int depth) throws WorldEditException {
-        if (mask.matches(editSession, position)) {
+        if (mask.test(position)) {
             affected++;
             switch (depth) {
                 case 0:

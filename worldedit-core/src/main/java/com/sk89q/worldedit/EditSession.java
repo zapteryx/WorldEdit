@@ -49,7 +49,7 @@ import com.sk89q.worldedit.function.generator.GardenPatchGenerator;
 import com.sk89q.worldedit.function.mask.*;
 import com.sk89q.worldedit.function.operation.*;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
-import com.sk89q.worldedit.function.pattern.Patterns;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.util.RegionOffset;
 import com.sk89q.worldedit.function.visitor.*;
 import com.sk89q.worldedit.history.UndoContext;
@@ -64,8 +64,6 @@ import com.sk89q.worldedit.math.interpolation.KochanekBartelsInterpolation;
 import com.sk89q.worldedit.math.interpolation.Node;
 import com.sk89q.worldedit.math.noise.RandomNoise;
 import com.sk89q.worldedit.math.transform.AffineTransform;
-import com.sk89q.worldedit.patterns.Pattern;
-import com.sk89q.worldedit.patterns.SingleBlockPattern;
 import com.sk89q.worldedit.regions.*;
 import com.sk89q.worldedit.regions.shape.ArbitraryBiomeShape;
 import com.sk89q.worldedit.regions.shape.ArbitraryShape;
@@ -308,21 +306,6 @@ public class EditSession implements Extent {
             maskingExtent.setMask(Masks.alwaysTrue());
         } else {
             maskingExtent.setMask(mask);
-        }
-    }
-
-    /**
-     * Set the mask.
-     *
-     * @param mask the mask
-     * @deprecated Use {@link #setMask(Mask)}
-     */
-    @Deprecated
-    public void setMask(com.sk89q.worldedit.masks.Mask mask) {
-        if (mask == null) {
-            setMask((Mask) null);
-        } else {
-            setMask(Masks.wrap(mask));
         }
     }
 
@@ -572,7 +555,7 @@ public class EditSession implements Extent {
      */
     @SuppressWarnings("deprecation")
     public boolean setBlock(Vector position, Pattern pattern) throws MaxChangedBlocksException {
-        return setBlock(position, pattern.next(position));
+        return setBlock(position, pattern.apply(position));
     }
 
     /**
@@ -620,7 +603,7 @@ public class EditSession implements Extent {
      */
     @Deprecated
     public boolean setBlockIfAir(Vector position, BaseBlock block) throws MaxChangedBlocksException {
-        return getBlock(position).isAir() && setBlock(position, block);
+        return getBlock(position).getId() == BlockType.AIR.getID() && setBlock(position, block);
     }
 
     @Override
@@ -752,7 +735,7 @@ public class EditSession implements Extent {
     @SuppressWarnings("deprecation")
     public int fillXZ(Vector origin, BaseBlock block, double radius, int depth, boolean recursive)
             throws MaxChangedBlocksException {
-        return fillXZ(origin, new SingleBlockPattern(block), radius, depth, recursive);
+        return fillXZ(origin, new BlockPattern(block), radius, depth, recursive);
     }
 
     /**
@@ -781,7 +764,7 @@ public class EditSession implements Extent {
                 Masks.negate(new ExistingBlockMask(this)));
 
         // Want to replace blocks
-        BlockReplace replace = new BlockReplace(this, Patterns.wrap(pattern));
+        BlockReplace replace = new BlockReplace(this, pattern);
 
         // Pick how we're going to visit blocks
         RecursiveVisitor visitor;
@@ -819,7 +802,7 @@ public class EditSession implements Extent {
                 getWorld(), // Causes clamping of Y range
                 position.add(-apothem + 1, 0, -apothem + 1),
                 position.add(apothem - 1, height - 1, apothem - 1));
-        Pattern pattern = new SingleBlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
         return setBlocks(region, pattern);
     }
 
@@ -842,7 +825,7 @@ public class EditSession implements Extent {
                 getWorld(), // Causes clamping of Y range
                 position.add(-apothem + 1, 0, -apothem + 1),
                 position.add(apothem - 1, -height + 1, apothem - 1));
-        Pattern pattern = new SingleBlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
         return setBlocks(region, pattern);
     }
 
@@ -866,7 +849,7 @@ public class EditSession implements Extent {
                 getWorld(), // Causes clamping of Y range
                 position.add(adjustment.multiply(-1)),
                 position.add(adjustment));
-        Pattern pattern = new SingleBlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
         return replaceBlocks(region, mask, pattern);
     }
 
@@ -880,7 +863,7 @@ public class EditSession implements Extent {
      */
     @SuppressWarnings("deprecation")
     public int setBlocks(Region region, BaseBlock block) throws MaxChangedBlocksException {
-        return setBlocks(region, new SingleBlockPattern(block));
+        return setBlocks(region, new BlockPattern(block));
     }
 
     /**
@@ -896,7 +879,7 @@ public class EditSession implements Extent {
         checkNotNull(region);
         checkNotNull(pattern);
 
-        BlockReplace replace = new BlockReplace(this, Patterns.wrap(pattern));
+        BlockReplace replace = new BlockReplace(this, pattern);
         RegionVisitor visitor = new RegionVisitor(region, replace);
         Operations.completeLegacy(visitor);
         return visitor.getAffected();
@@ -907,14 +890,14 @@ public class EditSession implements Extent {
      * returned by a given pattern.
      *
      * @param region the region to replace the blocks within
-     * @param filter a list of block types to match, or null to use {@link com.sk89q.worldedit.masks.ExistingBlockMask}
+     * @param filter a list of block types to match, or null to use {@link com.sk89q.worldedit.function.mask.ExistingBlockMask}
      * @param replacement the replacement block
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
      */
     @SuppressWarnings("deprecation")
     public int replaceBlocks(Region region, Set<BaseBlock> filter, BaseBlock replacement) throws MaxChangedBlocksException {
-        return replaceBlocks(region, filter, new SingleBlockPattern(replacement));
+        return replaceBlocks(region, filter, new BlockPattern(replacement));
     }
 
     /**
@@ -922,7 +905,7 @@ public class EditSession implements Extent {
      * returned by a given pattern.
      *
      * @param region the region to replace the blocks within
-     * @param filter a list of block types to match, or null to use {@link com.sk89q.worldedit.masks.ExistingBlockMask}
+     * @param filter a list of block types to match, or null to use {@link com.sk89q.worldedit.function.mask.ExistingBlockMask}
      * @param pattern the pattern that provides the new blocks
      * @return number of blocks affected
      * @throws MaxChangedBlocksException thrown if too many blocks are changed
@@ -949,7 +932,7 @@ public class EditSession implements Extent {
         checkNotNull(mask);
         checkNotNull(pattern);
 
-        BlockReplace replace = new BlockReplace(this, Patterns.wrap(pattern));
+        BlockReplace replace = new BlockReplace(this, pattern);
         RegionMaskingFilter filter = new RegionMaskingFilter(mask, replace);
         RegionVisitor visitor = new RegionVisitor(region, filter);
         Operations.completeLegacy(visitor);
@@ -989,7 +972,7 @@ public class EditSession implements Extent {
      */
     @SuppressWarnings("deprecation")
     public int makeCuboidFaces(Region region, BaseBlock block) throws MaxChangedBlocksException {
-        return makeCuboidFaces(region, new SingleBlockPattern(block));
+        return makeCuboidFaces(region, new BlockPattern(block));
     }
 
     /**
@@ -1044,7 +1027,7 @@ public class EditSession implements Extent {
      */
     @SuppressWarnings("deprecation")
     public int makeCuboidWalls(Region region, BaseBlock block) throws MaxChangedBlocksException {
-        return makeCuboidWalls(region, new SingleBlockPattern(block));
+        return makeCuboidWalls(region, new BlockPattern(block));
     }
 
     /**
@@ -1114,7 +1097,7 @@ public class EditSession implements Extent {
     public int overlayCuboidBlocks(Region region, BaseBlock block) throws MaxChangedBlocksException {
         checkNotNull(block);
 
-        return overlayCuboidBlocks(region, new SingleBlockPattern(block));
+        return overlayCuboidBlocks(region, new BlockPattern(block));
     }
 
     /**
@@ -1131,7 +1114,7 @@ public class EditSession implements Extent {
         checkNotNull(region);
         checkNotNull(pattern);
 
-        BlockReplace replace = new BlockReplace(this, Patterns.wrap(pattern));
+        BlockReplace replace = new BlockReplace(this, pattern);
         RegionOffset offset = new RegionOffset(new Vector(0, 1, 0), replace);
         GroundFunction ground = new GroundFunction(new ExistingBlockMask(this), offset);
         LayerVisitor visitor = new LayerVisitor(asFlatRegion(region), minimumBlockY(region), maximumBlockY(region), ground);
@@ -1818,7 +1801,7 @@ public class EditSession implements Extent {
             for (int z = basePosition.getBlockZ() - size; z <= basePosition.getBlockZ()
                     + size; ++z) {
                 // Don't want to be in the ground
-                if (!getBlock(new Vector(x, basePosition.getBlockY(), z)).isAir()) {
+                if (getBlock(new Vector(x, basePosition.getBlockY(), z)).getId() != BlockType.AIR.getID()) {
                     continue;
                 }
                 // The gods don't want a tree here
@@ -1828,7 +1811,7 @@ public class EditSession implements Extent {
 
                 for (int y = basePosition.getBlockY(); y >= basePosition.getBlockY() - 10; --y) {
                     // Check if we hit the ground
-                    int t = getBlock(new Vector(x, y, z)).getType();
+                    int t = getBlock(new Vector(x, y, z)).getId();
                     if (t == BlockID.GRASS || t == BlockID.DIRT) {
                         treeGenerator.generate(this, new Vector(x, y + 1, z));
                         ++affected;
@@ -1991,7 +1974,7 @@ public class EditSession implements Extent {
                 final Vector scaled = current.subtract(zero).divide(unit);
 
                 try {
-                    if (expression.evaluate(scaled.getX(), scaled.getY(), scaled.getZ(), defaultMaterial.getType(), defaultMaterial.getData()) <= 0) {
+                    if (expression.evaluate(scaled.getX(), scaled.getY(), scaled.getZ(), defaultMaterial.getId(), defaultMaterial.getData()) <= 0) {
                         return null;
                     }
 
@@ -2127,7 +2110,7 @@ public class EditSession implements Extent {
                 }
             }
 
-            if (setBlock(position, pattern.next(position))) {
+            if (setBlock(position, pattern.apply(position))) {
                 ++affected;
             }
         }

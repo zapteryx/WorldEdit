@@ -35,10 +35,6 @@ public final class IDHelper {
         return Item.getIdFromItem((Item) type);
     }
 
-    public static int resolve(BlockType type) {
-        return Block.getIdFromBlock((Block) type);
-    }
-
     public static int resolve(BiomeType type) {
         return ((BiomeGenBase) type).biomeID;
     }

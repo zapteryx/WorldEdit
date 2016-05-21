@@ -19,11 +19,14 @@
 
 package com.sk89q.worldedit.util;
 
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.WorldVectorFace;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.internal.LocalWorldAdapter;
+import com.sk89q.worldedit.world.World;
 
 /**
  * This class uses an inefficient method to figure out what block a player
@@ -34,7 +37,7 @@ import com.sk89q.worldedit.internal.LocalWorldAdapter;
  */
 public class TargetBlock {
 
-    private LocalWorld world;
+    private World world;
     private int maxDistance;
     private double checkDistance, curDistance;
     private Vector targetPos = new Vector();
@@ -47,21 +50,10 @@ public class TargetBlock {
      * 
      * @param player player to work with
      */
-    public TargetBlock(LocalPlayer player) {
+    public TargetBlock(Player player) {
         this.world = LocalWorldAdapter.adapt(player.getWorld());
         this.setValues(player.getPosition(), player.getYaw(), player.getPitch(),
                 300, 1.65, 0.2);
-    }
-
-    /**
-     * Constructor requiring a player, max distance and a checking distance
-     *
-     * @param player LocalPlayer to work with
-     * @param maxDistance how far it checks for blocks
-     * @param checkDistance how often to check for blocks, the smaller the more precise
-     */
-    public TargetBlock(LocalPlayer player, int maxDistance, double checkDistance) {
-        this((Player) player, maxDistance, checkDistance);
     }
 
     /**
@@ -111,9 +103,9 @@ public class TargetBlock {
      * 
      * @return Block
      */
-    public BlockWorldVector getAnyTargetBlock() {
+    public BlockVector getAnyTargetBlock() {
         boolean searchForLastBlock = true;
-        BlockWorldVector lastBlock = null;
+        BlockVector lastBlock = null;
         while (getNextBlock() != null) {
             if (world.getBlockType(getCurrentBlock()) == BlockID.AIR) {
                 if (searchForLastBlock) {
@@ -126,7 +118,7 @@ public class TargetBlock {
                 break;
             }
         }
-        BlockWorldVector currentBlock = getCurrentBlock();
+        BlockVector currentBlock = getCurrentBlock();
         return (currentBlock != null ? currentBlock : lastBlock);
     }
 
@@ -136,7 +128,7 @@ public class TargetBlock {
      * 
      * @return Block
      */
-    public BlockWorldVector getTargetBlock() {
+    public BlockVector getTargetBlock() {
         while (getNextBlock() != null && world.getBlockType(getCurrentBlock()) == 0) ;
         return getCurrentBlock();
     }
@@ -147,7 +139,7 @@ public class TargetBlock {
      * 
      * @return Block
      */
-    public BlockWorldVector getSolidTargetBlock() {
+    public BlockVector getSolidTargetBlock() {
         while (getNextBlock() != null && BlockType.canPassThrough(world.getBlock(getCurrentBlock()))) ;
         return getCurrentBlock();
     }
@@ -157,7 +149,7 @@ public class TargetBlock {
      * 
      * @return next block position
      */
-    public BlockWorldVector getNextBlock() {
+    public BlockVector getNextBlock() {
         prevPos = targetPos;
         do {
             curDistance += checkDistance;
@@ -175,7 +167,7 @@ public class TargetBlock {
             return null;
         }
 
-        return new BlockWorldVector(world, targetPos);
+        return new BlockVector(targetPos);
     }
 
     /**
@@ -183,11 +175,11 @@ public class TargetBlock {
      * 
      * @return block position
      */
-    public BlockWorldVector getCurrentBlock() {
+    public BlockVector getCurrentBlock() {
         if (curDistance > maxDistance) {
             return null;
         } else {
-            return new BlockWorldVector(world, targetPos);
+            return new BlockVector(targetPos);
         }
     }
 
@@ -196,8 +188,8 @@ public class TargetBlock {
      * 
      * @return block position
      */
-    public BlockWorldVector getPreviousBlock() {
-        return new BlockWorldVector(world, prevPos);
+    public BlockVector getPreviousBlock() {
+        return new BlockVector(prevPos);
     }
 
     public WorldVectorFace getAnyTargetBlockFace() {

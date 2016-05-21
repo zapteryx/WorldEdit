@@ -21,7 +21,7 @@ package com.sk89q.worldedit.regions.shape;
 
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.regions.Region;
 
 /**
@@ -88,14 +88,14 @@ public abstract class ArbitraryShape {
         switch (cacheEntry) {
         case 0:
             // unknown, fetch material
-            final BaseBlock material = getMaterial(x, y, z, pattern.next(new BlockVector(x, y, z)));
+            final BaseBlock material = getMaterial(x, y, z, pattern.apply(new BlockVector(x, y, z)));
             if (material == null) {
                 // outside
                 cache[index] = -1;
                 return null;
             }
 
-            short newCacheEntry = (short) (material.getType() | ((material.getData() + 1) << 8));
+            short newCacheEntry = (short) (material.getId() | ((material.getData() + 1) << 8));
             if (newCacheEntry == 0) {
                 // type and data 0
                 newCacheEntry = -2;
@@ -152,7 +152,7 @@ public abstract class ArbitraryShape {
             int z = position.getBlockZ();
 
             if (!hollow) {
-                final BaseBlock material = getMaterial(x, y, z, pattern.next(position));
+                final BaseBlock material = getMaterial(x, y, z, pattern.apply(position));
                 if (material != null && editSession.setBlock(position, material)) {
                     ++affected;
                 }

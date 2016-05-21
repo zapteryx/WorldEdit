@@ -51,10 +51,10 @@ public class QueryTool implements BlockTool {
         World world = (World) clicked.getExtent();
         EditSession editSession = session.createEditSession(player);
         BaseBlock block = (editSession).rawGetBlock(clicked.toVector());
-        BlockType type = BlockType.fromID(block.getType());
+        BlockType type = BlockType.fromID(block.getId());
 
         player.print("\u00A79@" + clicked.toVector() + ": " + "\u00A7e"
-                + "#" + block.getType() + "\u00A77" + " ("
+                + "#" + block.getId() + "\u00A77" + " ("
                 + (type == null ? "Unknown" : type.getName()) + ") "
                 + "\u00A7f"
                 + "[" + block.getData() + "]" + " (" + world.getBlockLightLevel(clicked.toVector()) + "/" + world.getBlockLightLevel(clicked.toVector().add(0, 1, 0)) + ")");

@@ -71,7 +71,7 @@ public class BaseBlockFactory {
         }
 
         for (BaseBlock baseBlock : baseBlocks) {
-            if (baseBlock.getType() == id && baseBlock.getData() == data) {
+            if (baseBlock.getId() == id && baseBlock.getData() == data) {
                 return baseBlock;
             }
         }

@@ -20,10 +20,7 @@
 package com.sk89q.worldedit.regions.selector;
 
 import com.google.common.base.Optional;
-import com.sk89q.worldedit.BlockVector;
-import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.IncompleteRegionException;
-import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.internal.cui.CUIRegion;
@@ -37,18 +34,14 @@ import com.sk89q.worldedit.regions.selector.limit.SelectorLimits;
 import com.sk89q.worldedit.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Creates a {@code ConvexPolyhedralRegion} from a user's selections.
  */
-public class ConvexPolyhedralRegionSelector extends com.sk89q.worldedit.regions.ConvexPolyhedralRegionSelector implements RegionSelector, CUIRegion {
+public class ConvexPolyhedralRegionSelector implements RegionSelector, CUIRegion {
 
     private final transient ConvexPolyhedralRegion region;
     private transient BlockVector pos1;

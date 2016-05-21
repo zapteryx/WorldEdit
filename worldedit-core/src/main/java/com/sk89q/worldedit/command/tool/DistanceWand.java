@@ -19,7 +19,9 @@
 
 package com.sk89q.worldedit.command.tool;
 
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.LocalConfiguration;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
@@ -43,7 +45,7 @@ public class DistanceWand extends BrushTool implements DoubleActionTraceTool {
     @Override
     public boolean actSecondary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
         if (session.isToolControlEnabled() && player.hasPermission("worldedit.selection.pos")) {
-            WorldVector target = getTarget(player);
+            Vector target = getTarget(player);
             if (target == null) return true;
 
             RegionSelector selector = session.getRegionSelector(player.getWorld());
@@ -60,7 +62,7 @@ public class DistanceWand extends BrushTool implements DoubleActionTraceTool {
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session) {
         if (session.isToolControlEnabled() && player.hasPermission("worldedit.selection.pos")) {
-            WorldVector target = getTarget(player);
+            Vector target = getTarget(player);
             if (target == null) return true;
 
             RegionSelector selector = session.getRegionSelector(player.getWorld());
@@ -73,8 +75,8 @@ public class DistanceWand extends BrushTool implements DoubleActionTraceTool {
         return false;
     }
 
-    public WorldVector getTarget(Player player) {
-        WorldVector target = null;
+    public Vector getTarget(Player player) {
+        Vector target = null;
         if (this.range > -1) {
             target = player.getBlockTrace(getRange(), true);
         } else {

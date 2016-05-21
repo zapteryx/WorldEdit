@@ -19,7 +19,10 @@
 
 package com.sk89q.worldedit.command.tool;
 
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.EditSession;
+import com.sk89q.worldedit.LocalConfiguration;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.entity.Player;
@@ -69,7 +72,7 @@ public class BlockReplacer implements DoubleActionBlockTool {
         World world = (World) clicked.getExtent();
         EditSession editSession = session.createEditSession(player);
         targetBlock = (editSession).getBlock(clicked.toVector());
-        BlockType type = BlockType.fromID(targetBlock.getType());
+        BlockType type = BlockType.fromID(targetBlock.getId());
 
         if (type != null) {
             player.print("Replacer tool switched to: " + type.getName());

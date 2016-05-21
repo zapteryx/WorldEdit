@@ -20,17 +20,8 @@
 package com.sk89q.worldedit.command;
 
 import com.google.common.base.Optional;
-import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandContext;
-import com.sk89q.minecraft.util.commands.CommandException;
-import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.minecraft.util.commands.Logging;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.Vector2D;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.minecraft.util.commands.*;
+import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.entity.Player;
@@ -39,14 +30,7 @@ import com.sk89q.worldedit.extent.clipboard.Clipboard;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.regions.RegionOperationException;
 import com.sk89q.worldedit.regions.RegionSelector;
-import com.sk89q.worldedit.regions.selector.ConvexPolyhedralRegionSelector;
-import com.sk89q.worldedit.regions.selector.CuboidRegionSelector;
-import com.sk89q.worldedit.regions.selector.CylinderRegionSelector;
-import com.sk89q.worldedit.regions.selector.EllipsoidRegionSelector;
-import com.sk89q.worldedit.regions.selector.ExtendingCuboidRegionSelector;
-import com.sk89q.worldedit.regions.selector.Polygonal2DRegionSelector;
-import com.sk89q.worldedit.regions.selector.RegionSelectorType;
-import com.sk89q.worldedit.regions.selector.SphereRegionSelector;
+import com.sk89q.worldedit.regions.selector.*;
 import com.sk89q.worldedit.session.ClipboardHolder;
 import com.sk89q.worldedit.util.Countable;
 import com.sk89q.worldedit.util.formatting.ColorCodeBuilder;
@@ -692,7 +676,7 @@ public class SelectionCommands {
                         String.valueOf(c.getAmount()),
                         c.getAmount() / (double) size * 100,
                         name == null ? "Unknown" : name,
-                        c.getID().getType(), c.getID().getData());
+                        c.getID().getId(), c.getID().getData());
                 player.print(str);
             }
         } else {

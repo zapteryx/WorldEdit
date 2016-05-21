@@ -25,9 +25,9 @@ import com.sk89q.minecraft.util.commands.CommandPermissions;
 import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.ItemType;
-import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.patterns.Pattern;
 import com.sk89q.worldedit.command.tool.*;
+import com.sk89q.worldedit.entity.Player;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.TreeGenerator;
 
 public class ToolCommands {
@@ -188,7 +188,7 @@ public class ToolCommands {
         BaseBlock primary = we.getBlock(player, args.getString(1));
         session.setTool(player.getItemInHand(), new LongRangeBuildTool(primary, secondary));
         player.print("Long-range building tool bound to " + ItemType.toHeldName(player.getItemInHand()) + ".");
-        player.print("Left-click set to " + ItemType.toName(secondary.getType()) + "; right-click set to "
-                + ItemType.toName(primary.getType()) + ".");
+        player.print("Left-click set to " + ItemType.toName(secondary.getId()) + "; right-click set to "
+                + ItemType.toName(primary.getId()) + ".");
     }
 }

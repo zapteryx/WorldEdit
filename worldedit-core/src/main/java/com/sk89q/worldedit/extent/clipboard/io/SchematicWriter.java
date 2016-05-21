@@ -19,16 +19,7 @@
 
 package com.sk89q.worldedit.extent.clipboard.io;
 
-import com.sk89q.jnbt.ByteArrayTag;
-import com.sk89q.jnbt.CompoundTag;
-import com.sk89q.jnbt.DoubleTag;
-import com.sk89q.jnbt.FloatTag;
-import com.sk89q.jnbt.IntTag;
-import com.sk89q.jnbt.ListTag;
-import com.sk89q.jnbt.NBTOutputStream;
-import com.sk89q.jnbt.ShortTag;
-import com.sk89q.jnbt.StringTag;
-import com.sk89q.jnbt.Tag;
+import com.sk89q.jnbt.*;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
@@ -120,17 +111,17 @@ public class SchematicWriter implements ClipboardWriter {
             BaseBlock block = clipboard.getBlock(point);
 
             // Save 4096 IDs in an AddBlocks section
-            if (block.getType() > 255) {
+            if (block.getId() > 255) {
                 if (addBlocks == null) { // Lazily create section
                     addBlocks = new byte[(blocks.length >> 1) + 1];
                 }
 
                 addBlocks[index >> 1] = (byte) (((index & 1) == 0) ?
-                        addBlocks[index >> 1] & 0xF0 | (block.getType() >> 8) & 0xF
-                        : addBlocks[index >> 1] & 0xF | ((block.getType() >> 8) & 0xF) << 4);
+                        addBlocks[index >> 1] & 0xF0 | (block.getId() >> 8) & 0xF
+                        : addBlocks[index >> 1] & 0xF | ((block.getId() >> 8) & 0xF) << 4);
             }
 
-            blocks[index] = (byte) block.getType();
+            blocks[index] = (byte) block.getId();
             blockData[index] = (byte) block.getData();
 
             // Store TileEntity data

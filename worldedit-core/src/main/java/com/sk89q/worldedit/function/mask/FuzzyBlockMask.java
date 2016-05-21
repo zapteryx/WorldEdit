@@ -42,7 +42,7 @@ public class FuzzyBlockMask extends BlockMask {
         Extent extent = getExtent();
         Collection<BaseBlock> blocks = getBlocks();
         BaseBlock lazyBlock = extent.getLazyBlock(vector);
-        BaseBlock compare = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(lazyBlock.getType(), lazyBlock.getData());
+        BaseBlock compare = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(lazyBlock.getId(), lazyBlock.getData());
         return Blocks.containsFuzzy(blocks, compare);
     }
 }

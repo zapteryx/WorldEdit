@@ -115,12 +115,12 @@ public class MultiStageReorder extends AbstractDelegateExtent implements Reorder
     }
 
     public int getPlacementPriority(BaseBlock block) {
-        if (BlockType.shouldPlaceLate(block.getType())) {
+        if (BlockType.shouldPlaceLate(block.getId())) {
             return 1;
-        } else if (BlockType.shouldPlaceLast(block.getType())) {
+        } else if (BlockType.shouldPlaceLast(block.getId())) {
             // Place torches, etc. last
             return 2;
-        } else if (BlockType.shouldPlaceFinal(block.getType())) {
+        } else if (BlockType.shouldPlaceFinal(block.getId())) {
             // Place signs, reed, etc even later
             return 3;
         } else {
@@ -147,7 +147,7 @@ public class MultiStageReorder extends AbstractDelegateExtent implements Reorder
         }
 
         stages.get(priority).put(location.toBlockPoint(), block);
-        return !(lazyBlock.getType() == block.getType() && lazyBlock.getData() == block.getData());
+        return !(lazyBlock.getId() == block.getId() && lazyBlock.getData() == block.getData());
     }
 
     @Override
@@ -210,7 +210,7 @@ public class MultiStageReorder extends AbstractDelegateExtent implements Reorder
 
                     final BaseBlock baseBlock = blockTypes.get(current);
 
-                    final int type = baseBlock.getType();
+                    final int type = baseBlock.getId();
                     final int data = baseBlock.getData();
 
                     switch (type) {

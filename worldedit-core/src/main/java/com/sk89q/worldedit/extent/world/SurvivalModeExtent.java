@@ -81,7 +81,7 @@ public class SurvivalModeExtent extends AbstractDelegateExtent {
 
     @Override
     public boolean setBlock(Vector location, BaseBlock block) throws WorldEditException {
-        if (toolUse && block.getType() == BlockID.AIR) {
+        if (toolUse && block.getId() == BlockID.AIR) {
             world.simulateBlockMine(location);
             return true;
         } else {

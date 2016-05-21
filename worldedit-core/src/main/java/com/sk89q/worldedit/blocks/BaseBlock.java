@@ -192,24 +192,6 @@ public class BaseBlock implements TileEntityBlock {
     }
 
     /**
-     * Get the type of block.
-     *
-     * @return the type
-     */
-    public int getType() {
-        return getId();
-    }
-
-    /**
-     * Returns true if it's air.
-     *
-     * @return if air
-     */
-    public boolean isAir() {
-        return getType() == BlockID.AIR;
-    }
-
-    /**
      * Checks whether the type ID and data value are equal.
      */
     @Override
@@ -220,7 +202,7 @@ public class BaseBlock implements TileEntityBlock {
 
         final BaseBlock otherBlock = (BaseBlock) o;
 
-        return getType() == otherBlock.getType() && getData() == otherBlock.getData();
+        return getId() == otherBlock.getId() && getData() == otherBlock.getData();
 
     }
 
@@ -231,7 +213,7 @@ public class BaseBlock implements TileEntityBlock {
      * @return true if equal
      */
     public boolean equalsFuzzy(BaseBlock o) {
-        return (getType() == o.getType()) && (getData() == o.getData() || getData() == -1 || o.getData() == -1);
+        return (getId() == o.getId()) && (getData() == o.getData() || getData() == -1 || o.getData() == -1);
     }
 
     @Override

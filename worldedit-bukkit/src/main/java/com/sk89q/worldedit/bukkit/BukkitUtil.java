@@ -56,10 +56,6 @@ public final class BukkitUtil {
         return new BlockVector(face.getModX(), face.getModY(), face.getModZ());
     }
 
-    public static BlockWorldVector toWorldVector(Block block) {
-        return new BlockWorldVector(getLocalWorld(block.getWorld()), block.getX(), block.getY(), block.getZ());
-    }
-
     public static Vector toVector(org.bukkit.Location loc) {
         return new Vector(loc.getX(), loc.getY(), loc.getZ());
     }
@@ -101,10 +97,6 @@ public final class BukkitUtil {
             return null;
         }
         return players.get(0);
-    }
-
-    public static Block toBlock(BlockWorldVector pt) {
-        return toWorld(pt).getBlockAt(toLocation(pt));
     }
 
     public static World toWorld(WorldVector pt) {

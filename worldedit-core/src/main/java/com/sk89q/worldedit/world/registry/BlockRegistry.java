@@ -20,50 +20,9 @@
 package com.sk89q.worldedit.world.registry;
 
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockMaterial;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
-/**
- * Provides information on blocks and provides methods to create them.
- */
-public interface BlockRegistry {
-
-    /**
-     * Create a new block using its ID.
-     *
-     * @param id the id
-     * @return the block, which may be null if no block exists
-     */
-    @Nullable
-    BaseBlock createFromId(String id);
-
-    /**
-     * Create a new block using its legacy numeric ID.
-     *
-     * @param id the id
-     * @return the block, which may be null if no block exists
-     */
-    @Nullable
-    BaseBlock createFromId(int id);
-
-    /**
-     * Get the material for the given block.
-     *
-     * @param block the block
-     * @return the material, or null if the material information is not known
-     */
-    @Nullable
-    BlockMaterial getMaterial(BaseBlock block);
-
-    /**
-     * Get an unmodifiable map of states for this block.
-     *
-     * @param block the block
-     * @return a map of states where the key is the state's ID
-     */
-    @Nullable
-    Map<String, ? extends State> getStates(BaseBlock block);
-
+public interface BlockRegistry<T> extends TypeRegistry<T, BaseBlock> {
+    public Map<String, ? extends State> getStates(BaseBlock worldEditType);
 }

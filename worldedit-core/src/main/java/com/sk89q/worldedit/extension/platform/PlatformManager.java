@@ -19,24 +19,11 @@
 
 package com.sk89q.worldedit.extension.platform;
 
-import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.ServerInterface;
+import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.WorldVector;
-import com.sk89q.worldedit.command.tool.BlockTool;
-import com.sk89q.worldedit.command.tool.DoubleActionBlockTool;
-import com.sk89q.worldedit.command.tool.DoubleActionTraceTool;
-import com.sk89q.worldedit.command.tool.Tool;
-import com.sk89q.worldedit.command.tool.TraceTool;
+import com.sk89q.worldedit.command.tool.*;
 import com.sk89q.worldedit.entity.Player;
-import com.sk89q.worldedit.event.platform.BlockInteractEvent;
-import com.sk89q.worldedit.event.platform.ConfigurationLoadEvent;
-import com.sk89q.worldedit.event.platform.Interaction;
-import com.sk89q.worldedit.event.platform.PlatformInitializeEvent;
-import com.sk89q.worldedit.event.platform.PlatformReadyEvent;
-import com.sk89q.worldedit.event.platform.PlayerInputEvent;
+import com.sk89q.worldedit.event.platform.*;
 import com.sk89q.worldedit.extension.platform.permission.ActorSelectorLimits;
 import com.sk89q.worldedit.internal.ServerInterfaceAdapter;
 import com.sk89q.worldedit.regions.RegionSelector;
@@ -45,11 +32,7 @@ import com.sk89q.worldedit.util.eventbus.Subscribe;
 import com.sk89q.worldedit.world.World;
 
 import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
@@ -403,9 +386,9 @@ public class PlatformManager {
                         return;
                     }
 
-                    WorldVector pos = player.getSolidBlockTrace(getConfiguration().navigationWandMaxDistance);
+                    Vector pos = player.getSolidBlockTrace(getConfiguration().navigationWandMaxDistance);
                     if (pos != null) {
-                        player.findFreePosition(pos);
+                        player.findFreePosition(new Location(player.getWorld(), pos));
                     } else {
                         player.printError("No block in sight (or too far)!");
                     }

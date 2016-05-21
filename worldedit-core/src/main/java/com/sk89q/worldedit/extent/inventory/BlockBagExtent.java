@@ -82,8 +82,8 @@ public class BlockBagExtent extends AbstractDelegateExtent {
     public boolean setBlock(Vector position, BaseBlock block) throws WorldEditException {
         if (blockBag != null) {
             BaseBlock lazyBlock = getExtent().getLazyBlock(position);
-            int existing = lazyBlock.getType();
-            final int type = block.getType();
+            int existing = lazyBlock.getId();
+            final int type = block.getId();
 
             if (type > 0) {
                 try {

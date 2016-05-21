@@ -19,7 +19,10 @@
 
 package com.sk89q.worldedit.regions.selector;
 
-import com.sk89q.worldedit.*;
+import com.sk89q.worldedit.BlockVector;
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.LocalSession;
+import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.internal.cui.CUIRegion;
 import com.sk89q.worldedit.internal.cui.SelectionPointEvent;
@@ -38,7 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Creates a {@code CuboidRegion} from a user's selections.
  */
-public class CuboidRegionSelector extends com.sk89q.worldedit.regions.CuboidRegionSelector implements RegionSelector, CUIRegion {
+public class CuboidRegionSelector implements RegionSelector, CUIRegion {
 
     protected transient BlockVector position1;
     protected transient BlockVector position2;

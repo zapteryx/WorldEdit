@@ -60,7 +60,7 @@ public class BaseItem {
      * 
      * @return the id
      */
-    public int getType() {
+    public int getId() {
         return id;
     }
 

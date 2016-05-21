@@ -20,17 +20,8 @@
 package com.sk89q.worldedit.command;
 
 import com.google.common.base.Joiner;
-import com.sk89q.minecraft.util.commands.Command;
-import com.sk89q.minecraft.util.commands.CommandContext;
-import com.sk89q.minecraft.util.commands.CommandException;
-import com.sk89q.minecraft.util.commands.CommandPermissions;
-import com.sk89q.minecraft.util.commands.Logging;
-import com.sk89q.worldedit.EditSession;
-import com.sk89q.worldedit.LocalConfiguration;
-import com.sk89q.worldedit.LocalSession;
-import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldEdit;
-import com.sk89q.worldedit.WorldEditException;
+import com.sk89q.minecraft.util.commands.*;
+import com.sk89q.worldedit.*;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.command.util.CreatureButcher;
 import com.sk89q.worldedit.command.util.EntityRemover;
@@ -41,12 +32,12 @@ import com.sk89q.worldedit.extension.platform.Capability;
 import com.sk89q.worldedit.extension.platform.CommandManager;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.operation.Operations;
+import com.sk89q.worldedit.function.pattern.BlockPattern;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.visitor.EntityVisitor;
 import com.sk89q.worldedit.internal.expression.Expression;
 import com.sk89q.worldedit.internal.expression.ExpressionException;
 import com.sk89q.worldedit.internal.expression.runtime.EvaluationException;
-import com.sk89q.worldedit.patterns.Pattern;
-import com.sk89q.worldedit.patterns.SingleBlockPattern;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CylinderRegion;
 import com.sk89q.worldedit.regions.Region;
@@ -99,9 +90,9 @@ public class UtilityCommands {
 
         Vector pos = session.getPlacementPosition(player);
         int affected = 0;
-        if (pattern instanceof SingleBlockPattern) {
+        if (pattern instanceof BlockPattern) {
             affected = editSession.fillXZ(pos,
-                    ((SingleBlockPattern) pattern).getBlock(),
+                    ((BlockPattern) pattern).getBlock(),
                     radius, depth, false);
         } else {
             affected = editSession.fillXZ(pos, pattern, radius, depth, false);
@@ -127,9 +118,9 @@ public class UtilityCommands {
 
         Vector pos = session.getPlacementPosition(player);
         int affected = 0;
-        if (pattern instanceof SingleBlockPattern) {
+        if (pattern instanceof BlockPattern) {
             affected = editSession.fillXZ(pos,
-                    ((SingleBlockPattern) pattern).getBlock(),
+                    ((BlockPattern) pattern).getBlock(),
                     radius, depth, true);
         } else {
             affected = editSession.fillXZ(pos, pattern, radius, depth, true);
@@ -247,7 +238,7 @@ public class UtilityCommands {
         int size = Math.max(1, args.getInteger(1, 50));
         we.checkMaxRadius(size);
 
-        int affected = editSession.removeNear(session.getPlacementPosition(player), block.getType(), size);
+        int affected = editSession.removeNear(session.getPlacementPosition(player), block.getId(), size);
         player.print(affected + " block(s) have been removed.");
     }
 
@@ -280,8 +271,8 @@ public class UtilityCommands {
         Vector max = base.add(size, size, size);
         Region region = new CuboidRegion(player.getWorld(), min, max);
 
-        if (to instanceof SingleBlockPattern) {
-            affected = editSession.replaceBlocks(region, from, ((SingleBlockPattern) to).getBlock());
+        if (to instanceof BlockPattern) {
+            affected = editSession.replaceBlocks(region, from, ((BlockPattern) to).getBlock());
         } else {
             affected = editSession.replaceBlocks(region, from, to);
         }

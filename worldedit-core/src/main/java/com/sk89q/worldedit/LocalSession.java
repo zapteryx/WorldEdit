@@ -23,16 +23,11 @@ import com.sk89q.jchronic.Chronic;
 import com.sk89q.jchronic.Options;
 import com.sk89q.jchronic.utils.Span;
 import com.sk89q.jchronic.utils.Time;
-import com.sk89q.worldedit.command.tool.BlockTool;
-import com.sk89q.worldedit.command.tool.BrushTool;
-import com.sk89q.worldedit.command.tool.InvalidToolBindException;
-import com.sk89q.worldedit.command.tool.SinglePickaxe;
-import com.sk89q.worldedit.command.tool.Tool;
+import com.sk89q.worldedit.command.tool.*;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.function.mask.Mask;
-import com.sk89q.worldedit.function.mask.Masks;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
 import com.sk89q.worldedit.internal.cui.CUIRegion;
 import com.sk89q.worldedit.internal.cui.SelectionShapeEvent;
@@ -46,11 +41,7 @@ import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.snapshot.Snapshot;
 
 import javax.annotation.Nullable;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -907,15 +898,4 @@ public class LocalSession {
     public void setMask(Mask mask) {
         this.mask = mask;
     }
-
-    /**
-     * Set a mask.
-     *
-     * @param mask mask or null
-     */
-    @SuppressWarnings("deprecation")
-    public void setMask(com.sk89q.worldedit.masks.Mask mask) {
-        setMask(mask != null ? Masks.wrap(mask) : null);
-    }
-
 }

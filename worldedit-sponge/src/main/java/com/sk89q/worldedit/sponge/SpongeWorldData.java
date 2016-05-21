@@ -19,16 +19,37 @@
 
 package com.sk89q.worldedit.sponge;
 
+import com.sk89q.worldedit.sponge.registry.SpongeBlockRegistry;
+import com.sk89q.worldedit.sponge.registry.SpongeItemRegistry;
 import com.sk89q.worldedit.world.registry.BiomeRegistry;
-import com.sk89q.worldedit.world.registry.LegacyWorldData;
+import com.sk89q.worldedit.world.registry.EntityRegistry;
+import com.sk89q.worldedit.world.registry.ItemRegistry;
+import com.sk89q.worldedit.world.registry.WorldData;
 
 /**
  * World data for the Sponge platform.
  */
-class SpongeWorldData extends LegacyWorldData {
+public class SpongeWorldData implements WorldData {
 
     private static final SpongeWorldData INSTANCE = new SpongeWorldData();
+    private final SpongeBlockRegistry blockRegistry = new SpongeBlockRegistry();
+    private final SpongeItemRegistry itemRegistry = new SpongeItemRegistry();
     private final BiomeRegistry biomeRegistry = new SpongeBiomeRegistry();
+
+    @Override
+    public SpongeBlockRegistry getBlockRegistry() {
+        return blockRegistry;
+    }
+
+    @Override
+    public ItemRegistry getItemRegistry() {
+        return itemRegistry;
+    }
+
+    @Override
+    public EntityRegistry getEntityRegistry() {
+        return null;
+    }
 
     @Override
     public BiomeRegistry getBiomeRegistry() {

@@ -19,22 +19,33 @@
 
 package com.sk89q.worldedit.world.registry;
 
-import com.sk89q.worldedit.blocks.BaseItem;
-
 import javax.annotation.Nullable;
 
 public class NullItemRegistry implements ItemRegistry {
+    @Override
+    public Object createFromId(int id) {
+        return null;
+    }
+
+    @Override
+    public Object createFromId(String name) {
+        return null;
+    }
+
+    @Override
+    public boolean hasEntry(int id) {
+        return false;
+    }
 
     @Nullable
     @Override
-    public BaseItem createFromId(String id) {
+    public Object getType(Object nativeType) {
         return null;
     }
 
     @Nullable
     @Override
-    public BaseItem createFromId(int id) {
+    public Object toNative(Object worldEditType) {
         return null;
     }
-
 }

@@ -25,6 +25,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.function.pattern.Pattern;
 
 import java.util.ArrayList;
@@ -50,7 +51,7 @@ public class GravityBrush implements Brush {
                 for (; y > position.getBlockY() - size; --y) {
                     final Vector pt = new Vector(x, y, z);
                     final BaseBlock block = editSession.getBlock(pt);
-                    if (!block.isAir()) {
+                    if (block.getId() != BlockType.AIR.getID()) {
                         blockTypes.add(block);
                         editSession.setBlock(pt, air);
                     }
@@ -58,7 +59,7 @@ public class GravityBrush implements Brush {
                 Vector pt = new Vector(x, y, z);
                 Collections.reverse(blockTypes);
                 for (int i = 0; i < blockTypes.size();) {
-                    if (editSession.getBlock(pt).getType() == BlockID.AIR) {
+                    if (editSession.getBlock(pt).getId() == BlockID.AIR) {
                         editSession.setBlock(pt, blockTypes.get(i++));
                     }
                     pt = pt.add(0, 1, 0);

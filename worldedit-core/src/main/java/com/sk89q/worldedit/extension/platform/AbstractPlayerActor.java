@@ -27,6 +27,7 @@ import com.sk89q.worldedit.blocks.ItemID;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.internal.cui.CUIEvent;
+import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TargetBlock;
 import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.world.World;
@@ -86,8 +87,8 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
     }
 
     @Override
-    public void findFreePosition(WorldVector searchPos) {
-        World world = searchPos.getWorld();
+    public void findFreePosition(Location searchPos) {
+        Extent world = searchPos.getExtent();
         int x = searchPos.getBlockX();
         int y = Math.max(0, searchPos.getBlockY());
         int origY = y;
@@ -95,7 +96,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
 
         byte free = 0;
 
-        while (y <= world.getMaxY() + 2) {
+        while (y <= world.getMaximumPoint().getY() + 2) {
             if (BlockType.canPassThrough(world.getBlock(new Vector(x, y, z)))) {
                 ++free;
             } else {
@@ -105,8 +106,9 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
             if (free == 2) {
                 if (y - 1 != origY) {
                     final Vector pos = new Vector(x, y - 2, z);
-                    final int id = world.getBlockType(pos);
-                    final int data = world.getBlockData(pos);
+                    final BaseBlock block = world.getBlock(pos);
+                    final int id = block.getId();
+                    final int data = block.getData();
                     setPosition(new Vector(x + 0.5, y - 2 + BlockType.centralTopLimit(id, data), z + 0.5));
                 }
 
@@ -118,16 +120,17 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
     }
 
     @Override
-    public void setOnGround(WorldVector searchPos) {
-        World world = searchPos.getWorld();
+    public void setOnGround(Location searchPos) {
+        Extent world = searchPos.getExtent();
         int x = searchPos.getBlockX();
         int y = Math.max(0, searchPos.getBlockY());
         int z = searchPos.getBlockZ();
 
         while (y >= 0) {
             final Vector pos = new Vector(x, y, z);
-            final int id = world.getBlockType(pos);
-            final int data = world.getBlockData(pos);
+            final BaseBlock block = world.getBlock(pos);
+            final int id = block.getId();
+            final int data = block.getData();
             if (!BlockType.canPassThrough(id, data)) {
                 setPosition(new Vector(x + 0.5, y + BlockType.centralTopLimit(id, data), z + 0.5));
                 return;
@@ -139,7 +142,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
 
     @Override
     public void findFreePosition() {
-        findFreePosition(getBlockIn());
+        findFreePosition(new Location(getWorld(), getBlockIn()));
     }
 
     @Override
@@ -313,7 +316,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
     }
 
     @Override
-    public WorldVector getBlockTrace(int range, boolean useLastBlock) {
+    public BlockVector getBlockTrace(int range, boolean useLastBlock) {
         TargetBlock tb = new TargetBlock(this, range, 0.2);
         return (useLastBlock ? tb.getAnyTargetBlock() : tb.getTargetBlock());
     }
@@ -325,12 +328,12 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
     }
 
     @Override
-    public WorldVector getBlockTrace(int range) {
+    public Vector getBlockTrace(int range) {
         return getBlockTrace(range, false);
     }
 
     @Override
-    public WorldVector getSolidBlockTrace(int range) {
+    public Vector getSolidBlockTrace(int range) {
         TargetBlock tb = new TargetBlock(this, range, 0.2);
         return tb.getSolidTargetBlock();
     }
@@ -377,7 +380,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
         int searchDist = 0;
         TargetBlock hitBlox = new TargetBlock(this, range, 0.2);
         World world = getPosition().getWorld();
-        BlockWorldVector block;
+        BlockVector block;
         boolean firstBlock = true;
         int freeToFind = 2;
         boolean inFree = false;
@@ -406,7 +409,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
             }
 
             if (freeToFind == 0) {
-                setOnGround(block);
+                setOnGround(new Location(getWorld(), block));
                 return true;
             }
 

@@ -21,26 +21,5 @@ package com.sk89q.worldedit.world.registry;
 
 import com.sk89q.worldedit.blocks.BaseItem;
 
-import javax.annotation.Nullable;
-
-public interface ItemRegistry {
-
-    /**
-     * Create a new item using its ID.
-     *
-     * @param id the id
-     * @return the item, which may be null if no item exists
-     */
-    @Nullable
-    BaseItem createFromId(String id);
-
-    /**
-     * Create a new item using its legacy numeric ID.
-     *
-     * @param id the id
-     * @return the item, which may be null if no item exists
-     */
-    @Nullable
-    BaseItem createFromId(int id);
-
+public interface ItemRegistry<T> extends TypeRegistry<T, BaseItem> {
 }

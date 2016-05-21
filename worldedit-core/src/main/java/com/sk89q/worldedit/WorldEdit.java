@@ -19,7 +19,6 @@
 
 package com.sk89q.worldedit;
 
-import com.sk89q.worldedit.CuboidClipboard.FlipDirection;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BaseBlockFactory;
 import com.sk89q.worldedit.blocks.BaseItem;
@@ -38,10 +37,8 @@ import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.extension.platform.PlatformManager;
 import com.sk89q.worldedit.extent.inventory.BlockBag;
-import com.sk89q.worldedit.function.mask.Masks;
-import com.sk89q.worldedit.function.pattern.Patterns;
-import com.sk89q.worldedit.masks.Mask;
-import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.scripting.CraftScriptContext;
 import com.sk89q.worldedit.scripting.CraftScriptEngine;
 import com.sk89q.worldedit.scripting.RhinoCraftScriptEngine;
@@ -316,7 +313,7 @@ public class WorldEdit {
         String[] items = list.split(",");
         Set<Integer> blocks = new HashSet<Integer>();
         for (String s : items) {
-            blocks.add(getBlock(player, s, allBlocksAllowed).getType());
+            blocks.add(getBlock(player, s, allBlocksAllowed).getId());
         }
         return blocks;
     }
@@ -331,7 +328,7 @@ public class WorldEdit {
         context.setActor(player);
         context.setWorld(player.getWorld());
         context.setSession(getSession(player));
-        return Patterns.wrap(getPatternFactory().parseFromInput(input, context));
+        return getPatternFactory().parseFromInput(input, context);
     }
 
     /**
@@ -344,7 +341,7 @@ public class WorldEdit {
         context.setActor(player);
         context.setWorld(player.getWorld());
         context.setSession(session);
-        return Masks.wrap(getMaskFactory().parseFromInput(input, context));
+        return getMaskFactory().parseFromInput(input, context);
     }
 
     /**
@@ -591,34 +588,6 @@ public class WorldEdit {
      */
     public Vector getDiagonalDirection(Player player, String dirStr) throws UnknownDirectionException {
         return getPlayerDirection(player, dirStr.toLowerCase()).vector();
-    }
-
-    /**
-     * Get the flip direction for a player's direction.
-     *
-     * @param player the player
-     * @param dirStr the direction string
-     * @return a direction vector
-     * @throws UnknownDirectionException thrown if the direction is not known
-     */
-    public FlipDirection getFlipDirection(Player player, String dirStr) throws UnknownDirectionException {
-        final PlayerDirection dir = getPlayerDirection(player, dirStr);
-        switch (dir) {
-        case WEST:
-        case EAST:
-            return FlipDirection.WEST_EAST;
-
-        case NORTH:
-        case SOUTH:
-            return FlipDirection.NORTH_SOUTH;
-
-        case UP:
-        case DOWN:
-            return FlipDirection.UP_DOWN;
-
-        default:
-            throw new UnknownDirectionException(dir.name());
-        }
     }
 
     /**

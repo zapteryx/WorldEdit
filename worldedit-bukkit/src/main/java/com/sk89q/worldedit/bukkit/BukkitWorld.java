@@ -313,7 +313,7 @@ public class BukkitWorld extends LocalWorld {
     @Override
     public void dropItem(Vector pt, BaseItemStack item) {
         World world = getWorld();
-        ItemStack bukkitItem = new ItemStack(item.getType(), item.getAmount(),
+        ItemStack bukkitItem = new ItemStack(item.getId(), item.getAmount(),
                 item.getData());
         world.dropItemNaturally(BukkitUtil.toLocation(world, pt), bukkitItem);
     }
@@ -406,7 +406,7 @@ public class BukkitWorld extends LocalWorld {
             return adapter.setBlock(BukkitAdapter.adapt(getWorld(), position), block, notifyAndLight);
         } else {
             Block bukkitBlock = getWorld().getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
-            return bukkitBlock.setTypeIdAndData(block.getType(), (byte) block.getData(), notifyAndLight);
+            return bukkitBlock.setTypeIdAndData(block.getId(), (byte) block.getData(), notifyAndLight);
         }
     }
 

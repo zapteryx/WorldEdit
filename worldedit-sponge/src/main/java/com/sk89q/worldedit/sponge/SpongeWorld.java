@@ -31,10 +31,10 @@ import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.entity.Entity;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.sponge.nms.IDHelper;
+import com.sk89q.worldedit.sponge.registry.SpongeBlockRegistry;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.AbstractWorld;
 import com.sk89q.worldedit.world.biome.BaseBiome;
-import com.sk89q.worldedit.world.registry.WorldData;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -113,11 +113,25 @@ public abstract class SpongeWorld extends AbstractWorld {
         return getWorld().getName();
     }
 
-    protected abstract BlockState getBlockState(BaseBlock block);
-
     protected abstract void applyTileEntityData(TileEntity entity, BaseBlock block);
 
     private static final BlockSnapshot.Builder builder = BlockSnapshot.builder();
+
+    @Override
+    public BaseBlock getBlock(Vector position) {
+        World world = getWorld();
+
+        BlockState state = world.getBlock(position.getBlockX(), position.getBlockY(), position.getBlockZ());
+        return getWorldData().getBlockRegistry().getType(new SpongeBlockRegistry.Wrapper(state));
+    }
+
+    @Override
+    public BaseBlock getLazyBlock(Vector position) {
+        World world = getWorld();
+
+        BlockState state = world.getBlock(position.getBlockX(), position.getBlockY(), position.getBlockZ());
+        return getWorldData().getBlockRegistry().getType(new SpongeBlockRegistry.Wrapper(state));
+    }
 
     @Override
     public boolean setBlock(Vector position, BaseBlock block, boolean notifyAndLight) throws WorldEditException {
@@ -127,8 +141,10 @@ public abstract class SpongeWorld extends AbstractWorld {
         World world = getWorldChecked();
 
         // First set the block
+        SpongeBlockRegistry.Wrapper nativeBlockData = getWorldData().getBlockRegistry().toNative(block);
+
         Vector3i pos = new Vector3i(position.getX(), position.getY(), position.getZ());
-        BlockState newState = getBlockState(block);
+        BlockState newState = nativeBlockData.getState();
 
         BlockSnapshot snapshot = builder.reset()
                 .blockState(newState)
@@ -198,7 +214,7 @@ public abstract class SpongeWorld extends AbstractWorld {
         checkNotNull(position);
         checkNotNull(item);
 
-        if (item.getType() == 0) {
+        if (item.getId() == 0) {
             return;
         }
 
@@ -215,7 +231,7 @@ public abstract class SpongeWorld extends AbstractWorld {
     }
 
     @Override
-    public WorldData getWorldData() {
+    public SpongeWorldData getWorldData() {
         return SpongeWorldData.getInstance();
     }
 

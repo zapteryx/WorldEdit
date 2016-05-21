@@ -17,13 +17,14 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-package com.sk89q.worldedit.bags;
+package com.sk89q.worldedit.world.registry;
 
+public interface TypeRegistry<T, R> {
+    public R createFromId(int id);
+    public R createFromId(String name);
 
-/**
- * @deprecated Block bags are currently not a supported feature of WorldEdit
- */
-@Deprecated
-public class OutOfBlocksException extends BlockBagException {
+    public boolean hasEntry(int id);
 
+    public R getType(T nativeType);
+    public T toNative(R worldEditType);
 }

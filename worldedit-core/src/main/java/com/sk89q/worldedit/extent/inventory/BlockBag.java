@@ -20,7 +20,9 @@
 package com.sk89q.worldedit.extent.inventory;
 
 import com.sk89q.worldedit.WorldVector;
-import com.sk89q.worldedit.blocks.*;
+import com.sk89q.worldedit.blocks.BaseItem;
+import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldedit.blocks.BlockType;
 
 /**
  * Represents a source to get blocks from and store removed ones.
@@ -49,7 +51,7 @@ public abstract class BlockBag {
     public void storeDroppedBlock(int id, int data) throws BlockBagException {
         BaseItem dropped = BlockType.getBlockBagItem(id, data);
         if (dropped == null) return;
-        if (dropped.getType() == BlockID.AIR) return;
+        if (dropped.getId() == BlockID.AIR) return;
 
         storeItem(dropped);
     }
@@ -107,7 +109,7 @@ public abstract class BlockBag {
         } catch (OutOfBlocksException e) {
             BaseItem placed = BlockType.getBlockBagItem(id, data);
             if (placed == null) throw e; // TODO: check
-            if (placed.getType() == BlockID.AIR) throw e; // TODO: check
+            if (placed.getId() == BlockID.AIR) throw e; // TODO: check
 
             fetchItem(placed);
         }
@@ -134,7 +136,7 @@ public abstract class BlockBag {
      * @throws BlockBagException on error
      */
     public void fetchItem(BaseItem item) throws BlockBagException {
-        fetchBlock(item.getType());
+        fetchBlock(item.getId());
     }
 
     /**
@@ -158,7 +160,7 @@ public abstract class BlockBag {
      * @throws BlockBagException on error
      */
     public void storeItem(BaseItem item) throws BlockBagException {
-        storeBlock(item.getType());
+        storeBlock(item.getId());
     }
 
     /**

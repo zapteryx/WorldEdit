@@ -24,7 +24,7 @@ import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
-import com.sk89q.worldedit.patterns.Pattern;
+import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
 
@@ -86,8 +86,8 @@ public class FloodFillTool implements BlockTool {
 
         visited.add(pos);
 
-        if (editSession.getBlock(pos).getType() == initialType) {
-            editSession.setBlock(pos, pattern.next(pos));
+        if (editSession.getBlock(pos).getId() == initialType) {
+            editSession.setBlock(pos, pattern.apply(pos));
         } else {
             return;
         }

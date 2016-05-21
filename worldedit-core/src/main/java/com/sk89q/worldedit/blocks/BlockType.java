@@ -24,13 +24,6 @@ import com.sk89q.worldedit.PlayerDirection;
 import com.sk89q.worldedit.WorldEdit;
 
 import javax.annotation.Nullable;
-
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
-import java.util.Set;
 import java.util.*;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -1730,7 +1723,7 @@ public enum BlockType {
         if (dropped == null) {
             return BlockID.AIR;
         }
-        return dropped.getType();
+        return dropped.getId();
     }
 
     /**

@@ -21,7 +21,6 @@ package com.sk89q.worldedit.world.registry;
 
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockMaterial;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -30,7 +29,7 @@ import java.util.Map;
  * A block registry that uses {@link BundledBlockData} to serve information
  * about blocks.
  */
-public class LegacyBlockRegistry implements BlockRegistry {
+public class LegacyBlockRegistry implements BlockRegistry<Integer> {
 
     @Nullable
     @Override
@@ -43,16 +42,25 @@ public class LegacyBlockRegistry implements BlockRegistry {
         }
     }
 
-    @Nullable
     @Override
-    public BaseBlock createFromId(int id) {
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(id);
+    public boolean hasEntry(int id) {
+        return BundledBlockData.getInstance().getMaterialById(id) != null;
+    }
+
+    @Override
+    public BaseBlock getType(Integer nativeType) {
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(nativeType);
+    }
+
+    @Override
+    public Integer toNative(BaseBlock worldEditType) {
+        return worldEditType.getId();
     }
 
     @Nullable
     @Override
-    public BlockMaterial getMaterial(BaseBlock block) {
-        return BundledBlockData.getInstance().getMaterialById(block.getId());
+    public BaseBlock createFromId(int id) {
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(id);
     }
 
     @Nullable

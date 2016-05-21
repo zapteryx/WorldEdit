@@ -26,7 +26,6 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.Pattern;
-import com.sk89q.worldedit.function.pattern.Patterns;
 
 public class CylinderBrush implements Brush {
 
@@ -41,7 +40,7 @@ public class CylinderBrush implements Brush {
         if (pattern == null) {
             pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.COBBLESTONE));
         }
-        editSession.makeCylinder(position, Patterns.wrap(pattern), size, size, height, true);
+        editSession.makeCylinder(position, pattern, size, size, height, true);
     }
 
 }

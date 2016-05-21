@@ -22,13 +22,15 @@ package com.sk89q.worldedit.sponge.nms;
 import com.sk89q.worldedit.EditSession;
 import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
-import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.entity.BaseEntity;
 import com.sk89q.worldedit.internal.Constants;
 import com.sk89q.worldedit.sponge.SpongeWorld;
 import com.sk89q.worldedit.util.TreeGenerator;
-import net.minecraft.block.*;
+import net.minecraft.block.BlockLeaves;
+import net.minecraft.block.BlockOldLeaf;
+import net.minecraft.block.BlockOldLog;
+import net.minecraft.block.BlockPlanks;
 import net.minecraft.block.state.IBlockState;
 import net.minecraft.init.Blocks;
 import net.minecraft.inventory.IInventory;
@@ -37,7 +39,6 @@ import net.minecraft.nbt.NBTTagInt;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.BlockPos;
 import net.minecraft.world.gen.feature.*;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
@@ -60,11 +61,6 @@ public class SpongeNMSWorld extends SpongeWorld {
      */
     public SpongeNMSWorld(World world) {
         super(world);
-    }
-
-    @Override
-    protected BlockState getBlockState(BaseBlock block) {
-        return (BlockState) Block.getBlockById(block.getId()).getStateFromMeta(block.getData());
     }
 
     private NBTTagCompound updateForSet(NBTTagCompound tag, Vector position) {
@@ -143,33 +139,5 @@ public class SpongeNMSWorld extends SpongeWorld {
     public boolean generateTree(TreeGenerator.TreeType type, EditSession editSession, Vector pos) throws MaxChangedBlocksException {
         WorldGenerator generator = createWorldGenerator(type);
         return generator != null && generator.generate((net.minecraft.world.World) getWorld(), random, new BlockPos(pos.getX(), pos.getY(), pos.getZ()));
-    }
-
-    @Override
-    public BaseBlock getBlock(Vector position) {
-        World world = getWorld();
-        BlockPos pos = new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ());
-        IBlockState state = ((net.minecraft.world.World) world).getBlockState(pos);
-        TileEntity tile = ((net.minecraft.world.World) world).getTileEntity(pos);
-
-        if (tile != null) {
-            return new TileEntityBaseBlock(Block.getIdFromBlock(state.getBlock()), state.getBlock().getMetaFromState(state), tile);
-        } else {
-            return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(
-                    Block.getIdFromBlock(state.getBlock()),
-                    state.getBlock().getMetaFromState(state)
-            );
-        }
-    }
-
-    @Override
-    public BaseBlock getLazyBlock(Vector position) {
-        World world = getWorld();
-        BlockPos pos = new BlockPos(position.getBlockX(), position.getBlockY(), position.getBlockZ());
-        IBlockState state = ((net.minecraft.world.World) world).getBlockState(pos);
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(
-                Block.getIdFromBlock(state.getBlock()),
-                state.getBlock().getMetaFromState(state)
-        );
     }
 }
