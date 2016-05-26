@@ -125,7 +125,7 @@ public class BlockTransformExtent extends AbstractDelegateExtent {
         checkNotNull(registry);
 
         @SuppressWarnings("unchecked")
-        Map<String, ? extends State> states = registry.getStates(block);
+        Map<String, ? extends State> states = registry.getDescriptor(block).getStates();
 
         if (states == null) {
             return changedBlock;

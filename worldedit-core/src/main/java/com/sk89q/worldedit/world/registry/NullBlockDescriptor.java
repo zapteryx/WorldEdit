@@ -19,13 +19,28 @@
 
 package com.sk89q.worldedit.world.registry;
 
-public interface TypeRegistry<T, R> {
+import com.sk89q.worldedit.blocks.BlockMaterial;
 
-    public R createFromId(int id);
-    public R createFromId(String name);
+import java.util.Map;
 
-    public boolean hasEntry(int id);
+class NullBlockDescriptor implements BlockDescriptor {
+    @Override
+    public int getId() {
+        return 0;
+    }
 
-    public R getType(T nativeType);
-    public T toNative(R worldEditType);
+    @Override
+    public String getType() {
+        return null;
+    }
+
+    @Override
+    public BlockMaterial getMaterial() {
+        return null;
+    }
+
+    @Override
+    public Map<String, ? extends State> getStates() {
+        return null;
+    }
 }

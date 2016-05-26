@@ -19,21 +19,27 @@
 
 package com.sk89q.worldedit.sponge.registry;
 
+import com.sk89q.worldedit.blocks.BlockMaterial;
+import com.sk89q.worldedit.world.registry.BlockDescriptor;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.trait.BlockTrait;
 
 import java.util.List;
 import java.util.Map;
 
-class SpongeBlockDescriptor {
+class SpongeBlockDescriptor implements BlockDescriptor {
     private BlockType blockType;
+    private int id;
     private List<Map<BlockTrait<?>, ?>> variants;
 
+    private SpongeBlockMaterial material;
     private Map<String, SpongeBlockState<?>> blockState;
 
-    SpongeBlockDescriptor(BlockType blockType, List<Map<BlockTrait<?>, ?>> variants, Map<String, SpongeBlockState<?>> blockState) {
+    SpongeBlockDescriptor(BlockType blockType, List<Map<BlockTrait<?>, ?>> variants, int id, SpongeBlockMaterial material, Map<String, SpongeBlockState<?>> blockState) {
         this.blockType = blockType;
         this.variants = variants;
+        this.id = id;
+        this.material = material;
         this.blockState = blockState;
     }
 
@@ -45,7 +51,23 @@ class SpongeBlockDescriptor {
         return variants;
     }
 
-    public Map<String, SpongeBlockState<?>> getBlockStates() {
+    @Override
+    public int getId() {
+        return id;
+    }
+
+    @Override
+    public String getType() {
+        return blockType.getId();
+    }
+
+    @Override
+    public BlockMaterial getMaterial() {
+        return material;
+    }
+
+    @Override
+    public Map<String, SpongeBlockState<?>> getStates() {
         return blockState;
     }
 }

@@ -23,13 +23,17 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 
 /**
  * A block registry that uses {@link BundledBlockData} to serve information
  * about blocks.
  */
 public class LegacyBlockRegistry implements BlockRegistry<Integer> {
+
+    @Override
+    public BaseBlock createFromId(int id) {
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(id);
+    }
 
     @Nullable
     @Override
@@ -57,16 +61,13 @@ public class LegacyBlockRegistry implements BlockRegistry<Integer> {
         return worldEditType.getId();
     }
 
-    @Nullable
     @Override
-    public BaseBlock createFromId(int id) {
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(id);
+    public BlockDescriptor getDescriptor(Integer nativeType) {
+        return null;
     }
 
-    @Nullable
     @Override
-    public Map<String, ? extends State> getStates(BaseBlock block) {
-        return BundledBlockData.getInstance().getStatesById(block.getId());
+    public BlockDescriptor getDescriptor(BaseBlock worldEditType) {
+        return null;
     }
-
 }

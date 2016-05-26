@@ -21,8 +21,8 @@ package com.sk89q.worldedit.sponge.registry;
 
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.world.registry.BlockDescriptor;
 import com.sk89q.worldedit.world.registry.BlockRegistry;
-import com.sk89q.worldedit.world.registry.State;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -37,6 +37,11 @@ public class SpongeBlockRegistry implements BlockRegistry<SpongeBlockRegistry.Wr
 
     private Map<BlockType, Integer> blockTypeMapping = new HashMap<>();
     private List<SpongeBlockDescriptor> descriptors = new ArrayList<>();
+
+    @Override
+    public BaseBlock createFromId(int id) {
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(id);
+    }
 
     @Override
     public BaseBlock createFromId(String name) {
@@ -62,9 +67,19 @@ public class SpongeBlockRegistry implements BlockRegistry<SpongeBlockRegistry.Wr
 
     private int getBlock(BlockType targetType) {
         if (!blockTypeMapping.containsKey(targetType)) {
-            descriptors.add(new SpongeBlockDescriptor(targetType, new ArrayList<>(), generateBlockStates(targetType)));
+            SpongeBlockDescriptor descriptor = new SpongeBlockDescriptor(
+                    targetType,
+                    new ArrayList<>(),
+                    descriptors.size(),
+                    new SpongeBlockMaterial(targetType),
+                    generateBlockStates(targetType)
+            );
 
-            blockTypeMapping.put(targetType, descriptors.size() - 1);
+            descriptors.add(descriptor);
+
+
+            assert descriptor.getId() == descriptors.size() - 1;
+            blockTypeMapping.put(targetType, descriptor.getId());
         }
 
         return blockTypeMapping.get(targetType);
@@ -107,8 +122,13 @@ public class SpongeBlockRegistry implements BlockRegistry<SpongeBlockRegistry.Wr
     }
 
     @Override
-    public Map<String, ? extends State> getStates(BaseBlock worldEditType) {
-        return descriptors.get(worldEditType.getId()).getBlockStates();
+    public BlockDescriptor getDescriptor(Wrapper nativeType) {
+        return getDescriptor(getType(nativeType));
+    }
+
+    @Override
+    public BlockDescriptor getDescriptor(BaseBlock worldEditType) {
+        return descriptors.get(worldEditType.getId());
     }
 
     public static class Wrapper {

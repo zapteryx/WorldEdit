@@ -48,6 +48,7 @@ import java.util.logging.Logger;
  * reading fails (which occurs when this class is first instantiated), then
  * the methods will return {@code null}s for all blocks.</p>
  */
+@Deprecated
 public class BundledBlockData {
 
     private static final Logger log = Logger.getLogger(BundledBlockData.class.getCanonicalName());
@@ -123,6 +124,22 @@ public class BundledBlockData {
         BlockEntry entry = findById(id);
         if (entry != null) {
             return entry.legacyId;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * Convert the given numeric ID to a modern String ID.
+     *
+     * @param id the ID
+     * @return the String ID, which may be null if the block does not have a String ID
+     */
+    @Nullable
+    public String toStringId(int id) {
+        BlockEntry entry = findById(id);
+        if (entry != null) {
+            return entry.id;
         } else {
             return null;
         }

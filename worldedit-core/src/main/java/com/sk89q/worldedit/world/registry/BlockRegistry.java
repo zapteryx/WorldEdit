@@ -21,8 +21,7 @@ package com.sk89q.worldedit.world.registry;
 
 import com.sk89q.worldedit.blocks.BaseBlock;
 
-import java.util.Map;
-
 public interface BlockRegistry<T> extends TypeRegistry<T, BaseBlock> {
-    public Map<String, ? extends State> getStates(BaseBlock worldEditType);
+    public BlockDescriptor getDescriptor(T nativeType);
+    public BlockDescriptor getDescriptor(BaseBlock worldEditType);
 }
