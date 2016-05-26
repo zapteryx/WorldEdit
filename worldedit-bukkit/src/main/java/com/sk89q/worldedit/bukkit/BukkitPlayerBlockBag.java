@@ -28,6 +28,7 @@ import com.sk89q.worldedit.extent.inventory.BlockBag;
 import com.sk89q.worldedit.extent.inventory.BlockBagException;
 import com.sk89q.worldedit.extent.inventory.OutOfBlocksException;
 import com.sk89q.worldedit.extent.inventory.OutOfSpaceException;
+import com.sk89q.worldedit.world.registry.Blocks;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -71,7 +72,7 @@ public class BukkitPlayerBlockBag extends BlockBag {
         assert(amount == 1);
         boolean usesDamageValue = ItemType.usesDamageValue(id);
 
-        if (id == BlockID.AIR) {
+        if (id == Blocks.AIR.getId()) {
             throw new IllegalArgumentException("Can't fetch air block");
         }
 
