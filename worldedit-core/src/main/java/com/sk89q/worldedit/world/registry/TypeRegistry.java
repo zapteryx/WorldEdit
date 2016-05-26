@@ -20,7 +20,6 @@
 package com.sk89q.worldedit.world.registry;
 
 public interface TypeRegistry<T, R> {
-    public R createFromId(int id);
     public R createFromId(String name);
 
     public boolean hasEntry(int id);

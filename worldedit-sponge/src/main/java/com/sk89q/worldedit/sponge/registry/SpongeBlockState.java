@@ -28,16 +28,15 @@ import javax.annotation.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-public class SpongeBlockState<T extends Comparable<T>> implements State {
+class SpongeBlockState<T extends Comparable<T>> implements State {
     private final BlockTrait<T> blockTrait;
 
     private final Map<String, SpongeBlockStateValue<T>> values = new HashMap<>();
 
-    public SpongeBlockState(BlockTrait<T> blockTrait) {
+    SpongeBlockState(BlockTrait<T> blockTrait) {
         this.blockTrait = blockTrait;
 
         for (T value : blockTrait.getPossibleValues()) {
-            // TODO Convert to Sponge
             values.put(value.toString(), new SpongeBlockStateValue<>(blockTrait, value));
         }
     }

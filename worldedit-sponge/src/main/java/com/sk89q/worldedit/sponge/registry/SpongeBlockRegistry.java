@@ -36,27 +36,17 @@ import java.util.Map;
 public class SpongeBlockRegistry implements BlockRegistry<SpongeBlockRegistry.Wrapper> {
 
     private Map<BlockType, Integer> blockTypeMapping = new HashMap<>();
-    private List<List<Map<BlockTrait<?>, ?>>> typeVariants = new ArrayList<>();
-    private List<Map<String, SpongeBlockState<?>>> blockStates = new ArrayList<>();
-    private List<BlockType> blockTypes = new ArrayList<>();
-
-    @Override
-    public BaseBlock createFromId(int id) {
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(id);
-    }
+    private List<SpongeBlockDescriptor> descriptors = new ArrayList<>();
 
     @Override
     public BaseBlock createFromId(String name) {
         BlockType targetType = Sponge.getRegistry().getType(BlockType.class, name).get();
-        if (blockTypeMapping.containsKey(targetType)) {
-            return createFromId(blockTypeMapping.get(targetType));
-        }
-        return null;
+        return getType(new Wrapper(targetType.getDefaultState()));
     }
 
     @Override
     public boolean hasEntry(int id) {
-        return typeVariants.size() > id  && id >= 0;
+        return 0 <= id && id < descriptors.size();
     }
 
     @Override
@@ -64,23 +54,31 @@ public class SpongeBlockRegistry implements BlockRegistry<SpongeBlockRegistry.Wr
         BlockType targetType = nativeType.getState().getType();
         Map<BlockTrait<?>, ?> traitMap = nativeType.getState().getTraitMap();
 
-        if (!blockTypeMapping.containsKey(targetType)) {
-            blockTypes.add(targetType);
-            blockStates.add(generateBlockStates(targetType));
-            typeVariants.add(new ArrayList<>());
+        int blockId = getBlock(targetType);
+        int variantId = getVariant(blockId, traitMap);
 
-            blockTypeMapping.put(targetType, typeVariants.size() - 1);
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(blockId, variantId);
+    }
+
+    private int getBlock(BlockType targetType) {
+        if (!blockTypeMapping.containsKey(targetType)) {
+            descriptors.add(new SpongeBlockDescriptor(targetType, new ArrayList<>(), generateBlockStates(targetType)));
+
+            blockTypeMapping.put(targetType, descriptors.size() - 1);
         }
 
-        int blockId = blockTypeMapping.get(targetType);
-        List<Map<BlockTrait<?>, ?>> blockVariants = typeVariants.get(blockId);
+        return blockTypeMapping.get(targetType);
+    }
+
+    private int getVariant(int blockId, Map<BlockTrait<?>, ?> traitMap) {
+        List<Map<BlockTrait<?>, ?>> blockVariants = descriptors.get(blockId).getVariants();
         int variantId = blockVariants.indexOf(traitMap);
         if (variantId == -1) {
             blockVariants.add(traitMap);
             variantId = blockVariants.size() - 1;
         }
 
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(blockId, variantId);
+        return variantId;
     }
 
     private Map<String, SpongeBlockState<?>> generateBlockStates(BlockType type) {
@@ -95,8 +93,10 @@ public class SpongeBlockRegistry implements BlockRegistry<SpongeBlockRegistry.Wr
 
     @Override
     public SpongeBlockRegistry.Wrapper toNative(BaseBlock worldEditType) {
-        BlockType type = blockTypes.get(worldEditType.getId());
-        Map<BlockTrait<?>, ?> traitSet = typeVariants.get(worldEditType.getId()).get(worldEditType.getData());
+        SpongeBlockDescriptor descriptor = descriptors.get(worldEditType.getId());
+
+        BlockType type = descriptor.getBlockType();
+        Map<BlockTrait<?>, ?> traitSet = descriptor.getVariants().get(worldEditType.getData());
 
         BlockState nativeState = blockStateBuilder.reset().blockType(type).build();
         for (Map.Entry<BlockTrait<?>, ?> trait : traitSet.entrySet()) {
@@ -108,7 +108,7 @@ public class SpongeBlockRegistry implements BlockRegistry<SpongeBlockRegistry.Wr
 
     @Override
     public Map<String, ? extends State> getStates(BaseBlock worldEditType) {
-        return blockStates.get(worldEditType.getId());
+        return descriptors.get(worldEditType.getId()).getBlockStates();
     }
 
     public static class Wrapper {

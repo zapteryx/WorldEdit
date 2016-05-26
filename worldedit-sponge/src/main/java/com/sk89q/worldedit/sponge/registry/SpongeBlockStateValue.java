@@ -30,12 +30,12 @@ import org.spongepowered.api.block.trait.BlockTrait;
 import javax.annotation.Nullable;
 import java.util.Optional;
 
-public class SpongeBlockStateValue<T extends Comparable<T>> implements StateValue {
+class SpongeBlockStateValue<T extends Comparable<T>> implements StateValue {
 
     private BlockTrait<T> blockTrait;
     private T value;
 
-    public SpongeBlockStateValue(BlockTrait<T> blockTrait, T value) {
+    SpongeBlockStateValue(BlockTrait<T> blockTrait, T value) {
         this.blockTrait = blockTrait;
         this.value = value;
     }

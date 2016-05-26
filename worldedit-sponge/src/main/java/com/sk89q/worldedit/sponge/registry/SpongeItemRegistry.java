@@ -35,22 +35,14 @@ public class SpongeItemRegistry implements ItemRegistry<SpongeItemRegistry.Wrapp
     private List<ItemType> blockTypes = new ArrayList<>();
 
     @Override
-    public BaseItem createFromId(int id) {
-        return new BaseItem(id);
-    }
-
-    @Override
     public BaseItem createFromId(String name) {
         ItemType targetType = Sponge.getRegistry().getType(ItemType.class, name).get();
-        if (blockTypeMapping.containsKey(targetType)) {
-            return createFromId(blockTypeMapping.get(targetType));
-        }
-        return null;
+        return getType(new Wrapper(targetType));
     }
 
     @Override
     public boolean hasEntry(int id) {
-        return blockTypes.size() > id  && id >= 0;
+        return 0 <= id && id < blockTypes.size();
     }
 
     @Override
