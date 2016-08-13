@@ -26,13 +26,14 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 public class SphereBrush implements Brush {
 
     @Override
     public void build(EditSession editSession, Vector position, Pattern pattern, double size) throws MaxChangedBlocksException {
         if (pattern == null) {
-            pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.COBBLESTONE));
+            pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.COBBLESTONE.getId()));
         }
         editSession.makeSphere(position, pattern, size, size, size, true);
     }

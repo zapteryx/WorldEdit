@@ -26,6 +26,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -194,8 +195,8 @@ public class TreeGenerator {
         int trunkHeight = (int) Math.floor(Math.random() * 2) + 3;
         int height = (int) Math.floor(Math.random() * 5) + 8;
 
-        BaseBlock logBlock = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.LOG);
-        BaseBlock leavesBlock = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.LEAVES);
+        BaseBlock logBlock = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.LOG.getId());
+        BaseBlock leavesBlock = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.LEAVES.getId());
 
         // Create trunk
         for (int i = 0; i < trunkHeight; ++i) {

@@ -28,6 +28,7 @@ import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.function.operation.*;
 import com.sk89q.worldedit.util.collection.LowMemoryTupleArrayList;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import java.util.*;
 
@@ -142,7 +143,7 @@ public class MultiStageReorder extends AbstractDelegateExtent implements Reorder
         // Destroy torches, water, stand, etc. first
         if (srcPriority == 1 || srcPriority == 2) {
             // Destroy torches, etc. first
-            super.setBlock(location, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+            super.setBlock(location, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
             return super.setBlock(location, block);
         }
 

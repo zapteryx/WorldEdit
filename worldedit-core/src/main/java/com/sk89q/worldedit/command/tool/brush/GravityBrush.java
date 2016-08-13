@@ -27,6 +27,7 @@ import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.function.pattern.Pattern;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,7 +43,7 @@ public class GravityBrush implements Brush {
 
     @Override
     public void build(EditSession editSession, Vector position, Pattern pattern, double size) throws MaxChangedBlocksException {
-        final BaseBlock air = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR, 0);
+        final BaseBlock air = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId(), 0);
         final double startY = fullHeight ? editSession.getWorld().getMaxY() : position.getBlockY() + size;
         for (double x = position.getBlockX() + size; x > position.getBlockX() - size; --x) {
             for (double z = position.getBlockZ() + size; z > position.getBlockZ() - size; --z) {
@@ -59,7 +60,7 @@ public class GravityBrush implements Brush {
                 Vector pt = new Vector(x, y, z);
                 Collections.reverse(blockTypes);
                 for (int i = 0; i < blockTypes.size();) {
-                    if (editSession.getBlock(pt).getId() == BlockID.AIR) {
+                    if (editSession.getBlock(pt).getId() == Blocks.AIR.getId()) {
                         editSession.setBlock(pt, blockTypes.get(i++));
                     }
                     pt = pt.add(0, 1, 0);

@@ -26,6 +26,7 @@ import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.extent.AbstractDelegateExtent;
 import com.sk89q.worldedit.extent.Extent;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -81,7 +82,7 @@ public class SurvivalModeExtent extends AbstractDelegateExtent {
 
     @Override
     public boolean setBlock(Vector location, BaseBlock block) throws WorldEditException {
-        if (toolUse && block.getId() == BlockID.AIR) {
+        if (toolUse && block.getId() == Blocks.AIR.getId()) {
             world.simulateBlockMine(location);
             return true;
         } else {

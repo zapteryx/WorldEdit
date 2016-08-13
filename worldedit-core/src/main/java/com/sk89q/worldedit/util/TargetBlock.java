@@ -27,6 +27,7 @@ import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.internal.LocalWorldAdapter;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 /**
  * This class uses an inefficient method to figure out what block a player
@@ -107,7 +108,7 @@ public class TargetBlock {
         boolean searchForLastBlock = true;
         BlockVector lastBlock = null;
         while (getNextBlock() != null) {
-            if (world.getBlockType(getCurrentBlock()) == BlockID.AIR) {
+            if (world.getBlockType(getCurrentBlock()) == Blocks.AIR.getId()) {
                 if (searchForLastBlock) {
                     lastBlock = getCurrentBlock();
                     if (lastBlock.getBlockY() <= 0 || lastBlock.getBlockY() >= world.getMaxY()) {

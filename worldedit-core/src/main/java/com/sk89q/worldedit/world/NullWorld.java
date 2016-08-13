@@ -29,6 +29,7 @@ import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TreeGenerator.TreeType;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.registry.Blocks;
 import com.sk89q.worldedit.world.registry.WorldData;
 
 import javax.annotation.Nullable;
@@ -103,12 +104,12 @@ public class NullWorld extends AbstractWorld {
 
     @Override
     public BaseBlock getBlock(Vector position) {
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR);
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId());
     }
 
     @Override
     public BaseBlock getLazyBlock(Vector position) {
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR);
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId());
     }
 
     @Override

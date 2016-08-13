@@ -31,6 +31,7 @@ import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.regions.Region;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -130,7 +131,7 @@ public class BlockArrayClipboard implements Clipboard {
             }
         }
 
-        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR);
+        return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId());
     }
 
     @Override

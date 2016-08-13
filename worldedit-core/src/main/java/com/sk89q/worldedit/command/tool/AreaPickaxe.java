@@ -26,6 +26,7 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 /**
  * A super pickaxe mode that will remove blocks in an area.
@@ -55,7 +56,7 @@ public class AreaPickaxe implements BlockTool {
             return true;
         }
 
-        if (initialType == BlockID.BEDROCK && !player.canDestroyBedrock()) {
+        if (initialType == Blocks.BEDROCK.getId() && !player.canDestroyBedrock()) {
             return true;
         }
 

@@ -28,6 +28,7 @@ import com.sk89q.worldedit.bukkit.entity.BukkitEntity;
 import com.sk89q.worldedit.bukkit.entity.BukkitExpOrb;
 import com.sk89q.worldedit.bukkit.entity.BukkitItem;
 import com.sk89q.worldedit.bukkit.entity.BukkitPainting;
+import com.sk89q.worldedit.world.registry.Blocks;
 import org.bukkit.DyeColor;
 import org.bukkit.Server;
 import org.bukkit.World;
@@ -151,12 +152,12 @@ public final class BukkitUtil {
             case ItemID.INK_SACK:
                 final Dye materialData = (Dye) itemStack.getData();
                 if (materialData.getColor() == DyeColor.BROWN) {
-                    return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.COCOA_PLANT, -1);
+                    return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.COCOA.getId(), -1);
                 }
                 break;
 
             case ItemID.HEAD:
-                return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.HEAD, (byte) itemStack.getDurability());
+                return WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.SKULL.getId(), (byte) itemStack.getDurability());
 
             default:
                 final BaseBlock baseBlock = BlockType.getBlockForItem(typeId, itemStack.getDurability());

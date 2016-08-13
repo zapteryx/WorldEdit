@@ -24,9 +24,9 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.WorldEditException;
 import com.sk89q.worldedit.blocks.BaseBlock;
-import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.util.TreeGenerator;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 /**
  * Generates forests by searching for the ground starting from the given upper Y
@@ -53,15 +53,15 @@ public class ForestGenerator implements RegionFunction {
         BaseBlock block = editSession.getBlock(position);
         int t = block.getId();
 
-        if (t == BlockID.GRASS || t == BlockID.DIRT) {
+        if (t == Blocks.GRASS.getId() || t == Blocks.DIRT.getId()) {
             treeGenerator.generate(editSession, position.add(0, 1, 0));
             return true;
-        } else if (t == BlockID.LONG_GRASS || t == BlockID.DEAD_BUSH || t == BlockID.RED_FLOWER || t == BlockID.YELLOW_FLOWER) { // TODO: This list needs to be moved
-            editSession.setBlock(position, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        } else if (t == Blocks.TALLGRASS.getId() || t == Blocks.DEADBUSH.getId() || t == Blocks.RED_FLOWER.getId() || t == Blocks.YELLOW_FLOWER.getId()) { // TODO: This list needs to be moved
+            editSession.setBlock(position, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
             treeGenerator.generate(editSession, position);
             return true;
-        } else if (t == BlockID.SNOW) {
-            editSession.setBlock(position, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        } else if (t == Blocks.SNOW.getId()) {
+            editSession.setBlock(position, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
             return false;
         } else { // Trees won't grow on this!
             return false;

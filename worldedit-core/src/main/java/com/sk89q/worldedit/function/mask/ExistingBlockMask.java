@@ -22,6 +22,7 @@ package com.sk89q.worldedit.function.mask;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.extent.Extent;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import javax.annotation.Nullable;
 
@@ -42,7 +43,7 @@ public class ExistingBlockMask extends AbstractExtentMask {
 
     @Override
     public boolean test(Vector vector) {
-        return getExtent().getLazyBlock(vector).getId() != BlockID.AIR;
+        return getExtent().getLazyBlock(vector).getId() != Blocks.AIR.getId();
     }
 
     @Nullable

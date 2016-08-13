@@ -26,6 +26,7 @@ import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +37,7 @@ import java.util.Set;
  */
 public class RecursivePickaxe implements BlockTool {
 
-    private static final BaseBlock AIR = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR);
+    private static final BaseBlock AIR = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId());
     private double range;
 
     public RecursivePickaxe(double range) {
@@ -54,11 +55,11 @@ public class RecursivePickaxe implements BlockTool {
 
         int initialType = world.getBlockType(clicked.toVector());
 
-        if (initialType == BlockID.AIR) {
+        if (initialType == Blocks.AIR.getId()) {
             return true;
         }
 
-        if (initialType == BlockID.BEDROCK && !player.canDestroyBedrock()) {
+        if (initialType == Blocks.BEDROCK.getId() && !player.canDestroyBedrock()) {
             return true;
         }
 

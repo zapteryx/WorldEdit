@@ -26,6 +26,7 @@ import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BaseBlock;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.regions.Region;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -123,7 +124,7 @@ public class HeightMap {
         int originZ = minY.getBlockZ();
 
         int maxY = region.getMaximumPoint().getBlockY();
-        BaseBlock fillerAir = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR);
+        BaseBlock fillerAir = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId());
 
         int blocksChanged = 0;
 
@@ -149,8 +150,8 @@ public class HeightMap {
                     BaseBlock existing = session.getBlock(new Vector(xr, curHeight, zr));
 
                     // Skip water/lava
-                    if (existing.getId() != BlockID.WATER && existing.getId() != BlockID.STATIONARY_WATER
-                            && existing.getId() != BlockID.LAVA && existing.getId() != BlockID.STATIONARY_LAVA) {
+                    if (existing.getId() != Blocks.WATER.getId() && existing.getId() != Blocks.FLOWING_WATER.getId()
+                            && existing.getId() != Blocks.LAVA.getId() && existing.getId() != Blocks.FLOWING_LAVA.getId()) {
                         session.setBlock(new Vector(xr, newHeight, zr), existing);
                         ++blocksChanged;
 

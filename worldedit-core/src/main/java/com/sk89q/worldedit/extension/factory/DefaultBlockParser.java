@@ -37,6 +37,7 @@ import com.sk89q.worldedit.extension.input.ParserContext;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.internal.registry.InputParser;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import java.util.HashMap;
 
@@ -285,11 +286,11 @@ class DefaultBlockParser extends InputParser<BaseBlock> {
 
         HashMap<Integer, DelegateParser<CompoundTag>> delegateParsers = new HashMap<Integer, DelegateParser<CompoundTag>>();
         WallSignParser wallSignParser = new WallSignParser();
-        delegateParsers.put(BlockID.SIGN_POST, wallSignParser);
-        delegateParsers.put(BlockID.WALL_SIGN, wallSignParser);
-        delegateParsers.put(BlockID.MOB_SPAWNER, new MobSpawnerParser());
-        delegateParsers.put(BlockID.NOTE_BLOCK, new NoteBlockParser());
-        delegateParsers.put(BlockID.HEAD, new SkullParser());
+        delegateParsers.put(Blocks.STANDING_SIGN.getId(), wallSignParser);
+        delegateParsers.put(Blocks.WALL_SIGN.getId(), wallSignParser);
+        delegateParsers.put(Blocks.MOB_SPAWNER.getId(), new MobSpawnerParser());
+        delegateParsers.put(Blocks.NOTEBLOCK.getId(), new NoteBlockParser());
+        delegateParsers.put(Blocks.SKULL.getId(), new SkullParser());
 
         CompoundTag nbtData = null;
 

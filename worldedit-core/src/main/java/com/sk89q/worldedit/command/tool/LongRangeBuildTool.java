@@ -25,6 +25,7 @@ import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.entity.Player;
 import com.sk89q.worldedit.extension.platform.Actor;
 import com.sk89q.worldedit.extension.platform.Platform;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 /**
  * A tool that can place (or remove) blocks at a distance.
@@ -51,7 +52,7 @@ public class LongRangeBuildTool extends BrushTool implements DoubleActionTraceTo
         if (pos == null) return false;
         EditSession eS = session.createEditSession(player);
         try {
-            if (secondary.getId() == BlockID.AIR) {
+            if (secondary.getId() == Blocks.AIR.getId()) {
                 eS.setBlock(pos, secondary);
             } else {
                 eS.setBlock(pos.getFaceVector(), secondary);
@@ -70,7 +71,7 @@ public class LongRangeBuildTool extends BrushTool implements DoubleActionTraceTo
         if (pos == null) return false;
         EditSession eS = session.createEditSession(player);
         try {
-            if (primary.getId() == BlockID.AIR) {
+            if (primary.getId() == Blocks.AIR.getId()) {
                 eS.setBlock(pos, primary);
             } else {
                 eS.setBlock(pos.getFaceVector(), primary);

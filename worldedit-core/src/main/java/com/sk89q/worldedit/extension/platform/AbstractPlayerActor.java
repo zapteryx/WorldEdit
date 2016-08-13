@@ -31,6 +31,7 @@ import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.util.TargetBlock;
 import com.sk89q.worldedit.util.auth.AuthorizationException;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import java.io.File;
 
@@ -171,7 +172,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
                     final int type = block.getId();
 
                     // Don't get put in lava!
-                    if (type == BlockID.LAVA || type == BlockID.STATIONARY_LAVA) {
+                    if (type == Blocks.LAVA.getId() || type == Blocks.FLOWING_LAVA.getId()) {
                         return false;
                     }
 
@@ -213,7 +214,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
                     final int type = block.getId();
 
                     // Don't want to end up in lava
-                    if (type != BlockID.AIR && type != BlockID.LAVA && type != BlockID.STATIONARY_LAVA) {
+                    if (type != Blocks.AIR.getId() && type != Blocks.LAVA.getId() && type != Blocks.FLOWING_LAVA.getId()) {
                         // Found a block!
                         setPosition(platform.add(0.5, BlockType.centralTopLimit(block), 0.5));
                         return true;
@@ -297,7 +298,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
 
     @Override
     public void floatAt(int x, int y, int z, boolean alwaysGlass) {
-        getPosition().getWorld().setBlockType(new Vector(x, y - 1, z), BlockID.GLASS);
+        getPosition().getWorld().setBlockType(new Vector(x, y - 1, z), Blocks.GLASS.getId());
         setPosition(new Vector(x + 0.5, y, z + 0.5));
     }
 

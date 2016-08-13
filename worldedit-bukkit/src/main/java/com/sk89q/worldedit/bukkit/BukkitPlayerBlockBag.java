@@ -127,7 +127,7 @@ public class BukkitPlayerBlockBag extends BlockBag {
         assert(amount <= 64);
         boolean usesDamageValue = ItemType.usesDamageValue(id);
 
-        if (id == BlockID.AIR) {
+        if (id == Blocks.AIR.getId()) {
             throw new IllegalArgumentException("Can't store air block");
         }
 

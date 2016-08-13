@@ -20,13 +20,18 @@
 package com.sk89q.worldedit.world;
 
 import com.sk89q.worldedit.*;
-import com.sk89q.worldedit.blocks.*;
+import com.sk89q.worldedit.blocks.BaseBlock;
+import com.sk89q.worldedit.blocks.BaseItem;
+import com.sk89q.worldedit.blocks.BaseItemStack;
+import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldedit.blocks.BlockType;
 import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.mask.BlockMask;
 import com.sk89q.worldedit.function.mask.Mask;
 import com.sk89q.worldedit.function.operation.Operation;
 import com.sk89q.worldedit.util.Direction;
 import com.sk89q.worldedit.util.TreeGenerator.TreeType;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import javax.annotation.Nullable;
 import java.util.PriorityQueue;
@@ -97,10 +102,10 @@ public abstract class AbstractWorld implements World {
     @Override
     public Mask createLiquidMask() {
         return new BlockMask(this,
-                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.STATIONARY_LAVA, -1),
-                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.LAVA, -1),
-                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.STATIONARY_WATER, -1),
-                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.WATER, -1)
+                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.FLOWING_LAVA.getId(), -1),
+                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.LAVA.getId(), -1),
+                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.FLOWING_WATER.getId(), -1),
+                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.WATER.getId(), -1)
         );
     }
 
@@ -136,7 +141,7 @@ public abstract class AbstractWorld implements World {
         }
 
         try {
-            setBlock(pt, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+            setBlock(pt, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
         } catch (WorldEditException e) {
             throw new RuntimeException(e);
         }

@@ -26,6 +26,7 @@ import com.sk89q.worldedit.function.RegionFunction;
 import com.sk89q.worldedit.function.pattern.BlockPattern;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.function.pattern.RandomPattern;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import java.util.Random;
 
@@ -87,21 +88,21 @@ public class GardenPatchGenerator implements RegionFunction {
 
         for (int i = -1; i > -3; --i) {
             Vector testPos = pos.add(0, i, 0);
-            if (editSession.getBlockType(testPos) == BlockID.AIR) {
+            if (editSession.getBlockType(testPos) == Blocks.AIR.getId()) {
                 pos = testPos;
             } else {
                 break;
             }
         }
 
-        editSession.setBlockIfAir(pos, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.LEAVES));
+        editSession.setBlockIfAir(pos, WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.LEAVES.getId()));
         affected++;
 
         int t = random.nextInt(4);
         int h = random.nextInt(3) - 1;
         Vector p;
 
-        BaseBlock log = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.LOG);
+        BaseBlock log = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.LOG.getId());
 
         switch (t) {
             case 0:
@@ -156,15 +157,15 @@ public class GardenPatchGenerator implements RegionFunction {
 
     @Override
     public boolean apply(Vector position) throws WorldEditException {
-        if (editSession.getBlock(position).getId() != BlockID.AIR) {
+        if (editSession.getBlock(position).getId() != Blocks.AIR.getId()) {
             position = position.add(0, 1, 0);
         }
 
-        if (editSession.getBlock(position.add(0, -1, 0)).getId() != BlockID.GRASS) {
+        if (editSession.getBlock(position.add(0, -1, 0)).getId() != Blocks.GRASS.getId()) {
             return false;
         }
 
-        BaseBlock leavesBlock = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.LEAVES);
+        BaseBlock leavesBlock = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.LEAVES.getId());
 
         editSession.setBlockIfAir(position, leavesBlock);
 
@@ -184,7 +185,7 @@ public class GardenPatchGenerator implements RegionFunction {
     public static Pattern getPumpkinPattern() {
         RandomPattern pattern = new RandomPattern();
         for (int i = 0; i < 4; i++) {
-            pattern.add(new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.PUMPKIN, i)), 100);
+            pattern.add(new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.PUMPKIN.getId(), i)), 100);
         }
         return pattern;
     }
@@ -195,6 +196,6 @@ public class GardenPatchGenerator implements RegionFunction {
      * @return a melon pattern
      */
     public static Pattern getMelonPattern() {
-        return new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.MELON_BLOCK));
+        return new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.MELON_BLOCK.getId()));
     }
 }

@@ -76,6 +76,7 @@ import com.sk89q.worldedit.util.eventbus.EventBus;
 import com.sk89q.worldedit.world.NullWorld;
 import com.sk89q.worldedit.world.World;
 import com.sk89q.worldedit.world.biome.BaseBiome;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import javax.annotation.Nullable;
 import java.util.*;
@@ -802,7 +803,7 @@ public class EditSession implements Extent {
                 getWorld(), // Causes clamping of Y range
                 position.add(-apothem + 1, 0, -apothem + 1),
                 position.add(apothem - 1, height - 1, apothem - 1));
-        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
         return setBlocks(region, pattern);
     }
 
@@ -825,7 +826,7 @@ public class EditSession implements Extent {
                 getWorld(), // Causes clamping of Y range
                 position.add(-apothem + 1, 0, -apothem + 1),
                 position.add(apothem - 1, -height + 1, apothem - 1));
-        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
         return setBlocks(region, pattern);
     }
 
@@ -849,7 +850,7 @@ public class EditSession implements Extent {
                 getWorld(), // Causes clamping of Y range
                 position.add(adjustment.multiply(-1)),
                 position.add(adjustment));
-        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+        Pattern pattern = new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
         return replaceBlocks(region, mask, pattern);
     }
 
@@ -1188,7 +1189,7 @@ public class EditSession implements Extent {
         // Remove the original blocks
         com.sk89q.worldedit.function.pattern.Pattern pattern = replacement != null ?
                 new BlockPattern(replacement) :
-                new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR));
+                new BlockPattern(WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId()));
         BlockReplace remove = new BlockReplace(this, pattern);
 
         // Copy to a buffer so we don't destroy our original before we can copy all the blocks from it
@@ -1246,7 +1247,7 @@ public class EditSession implements Extent {
         BlockReplace replace = new BlockReplace(
                 this,
                 new BlockPattern(
-                        WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR)
+                        WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId())
                 )
         );
         RecursiveVisitor visitor = new RecursiveVisitor(mask, replace);
@@ -1288,7 +1289,7 @@ public class EditSession implements Extent {
                 new MaskUnion(liquidMask,
                         new BlockMask(
                                 this,
-                                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR)
+                                WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId())
                         )
                 );
 
@@ -1573,8 +1574,8 @@ public class EditSession implements Extent {
         int oy = position.getBlockY();
         int oz = position.getBlockZ();
 
-        BaseBlock air = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.AIR);
-        BaseBlock water = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.STATIONARY_WATER);
+        BaseBlock air = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.AIR.getId());
+        BaseBlock water = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.WATER.getId());
 
         int ceilRadius = (int) Math.ceil(radius);
         for (int x = ox - ceilRadius; x <= ox + ceilRadius; ++x) {
@@ -1631,8 +1632,8 @@ public class EditSession implements Extent {
         int oy = position.getBlockY();
         int oz = position.getBlockZ();
 
-        BaseBlock ice = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.ICE);
-        BaseBlock snow = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.SNOW);
+        BaseBlock ice = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.ICE.getId());
+        BaseBlock snow = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.SNOW_LAYER.getId());
 
         int ceilRadius = (int) Math.ceil(radius);
         for (int x = ox - ceilRadius; x <= ox + ceilRadius; ++x) {
@@ -1645,12 +1646,12 @@ public class EditSession implements Extent {
                     Vector pt = new Vector(x, y, z);
                     int id = getBlockType(pt);
 
-                    if (id == BlockID.AIR) {
+                    if (id == Blocks.AIR.getId()) {
                         continue;
                     }
 
                     // Ice!
-                    if (id == BlockID.WATER || id == BlockID.STATIONARY_WATER) {
+                    if (id == Blocks.FLOWING_WATER.getId() || id == Blocks.WATER.getId()) {
                         if (setBlock(pt, ice)) {
                             ++affected;
                         }
@@ -1711,7 +1712,7 @@ public class EditSession implements Extent {
         final int oy = position.getBlockY();
         final int oz = position.getBlockZ();
 
-        final BaseBlock grass = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.GRASS);
+        final BaseBlock grass = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.GRASS.getId());
 
         final int ceilRadius = (int) Math.ceil(radius);
         for (int x = ox - ceilRadius; x <= ox + ceilRadius; ++x) {
@@ -1812,18 +1813,18 @@ public class EditSession implements Extent {
                 for (int y = basePosition.getBlockY(); y >= basePosition.getBlockY() - 10; --y) {
                     // Check if we hit the ground
                     int t = getBlock(new Vector(x, y, z)).getId();
-                    if (t == BlockID.GRASS || t == BlockID.DIRT) {
+                    if (t == Blocks.GRASS.getId() || t == Blocks.DIRT.getId()) {
                         treeGenerator.generate(this, new Vector(x, y + 1, z));
                         ++affected;
                         break;
-                    } else if (t == BlockID.SNOW) {
+                    } else if (t == Blocks.SNOW_LAYER.getId()) {
                         setBlock(
                                 new Vector(x, y, z),
                                 WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(
-                                        BlockID.AIR
+                                        Blocks.AIR.getId()
                                 )
                         );
-                    } else if (t != BlockID.AIR) { // Trees won't grow on this!
+                    } else if (t != Blocks.AIR.getId()) { // Trees won't grow on this!
                         break;
                     }
                 }

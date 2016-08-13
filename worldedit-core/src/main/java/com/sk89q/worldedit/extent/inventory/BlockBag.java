@@ -23,6 +23,7 @@ import com.sk89q.worldedit.WorldVector;
 import com.sk89q.worldedit.blocks.BaseItem;
 import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.blocks.BlockType;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 /**
  * Represents a source to get blocks from and store removed ones.
@@ -51,7 +52,7 @@ public abstract class BlockBag {
     public void storeDroppedBlock(int id, int data) throws BlockBagException {
         BaseItem dropped = BlockType.getBlockBagItem(id, data);
         if (dropped == null) return;
-        if (dropped.getId() == BlockID.AIR) return;
+        if (dropped.getId() == Blocks.AIR.getId()) return;
 
         storeItem(dropped);
     }

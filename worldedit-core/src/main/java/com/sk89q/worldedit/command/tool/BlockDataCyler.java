@@ -40,39 +40,7 @@ public class BlockDataCyler implements DoubleActionBlockTool {
 
     private boolean handleCycle(Platform server, LocalConfiguration config,
             Player player, LocalSession session, Location clicked, boolean forward) {
-
-        World world = (World) clicked.getExtent();
-
-        int type = world.getBlockType(clicked.toVector());
-        int data = world.getBlockData(clicked.toVector());
-
-        if (!config.allowedDataCycleBlocks.isEmpty()
-                && !player.hasPermission("worldedit.override.data-cycler")
-                && !config.allowedDataCycleBlocks.contains(type)) {
-            player.printError("You are not permitted to cycle the data value of that block.");
-            return true;
-        }
-
-        int increment = forward ? 1 : -1;
-        BaseBlock block = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(
-                type,
-                BlockData.cycle(type, data, increment)
-        );
-        EditSession editSession = session.createEditSession(player);
-
-        if (block.getData() < 0) {
-            player.printError("That block's data cannot be cycled!");
-        } else {
-            try {
-                editSession.setBlock(clicked.toVector(), block);
-            } catch (MaxChangedBlocksException e) {
-                player.printError("Max blocks change limit reached.");
-            } finally {
-                session.remember(editSession);
-            }
-        }
-
-        return true;
+        return false;
     }
 
     @Override

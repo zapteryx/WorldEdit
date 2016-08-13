@@ -27,6 +27,7 @@ import com.sk89q.worldedit.extension.platform.Platform;
 import com.sk89q.worldedit.function.pattern.Pattern;
 import com.sk89q.worldedit.util.Location;
 import com.sk89q.worldedit.world.World;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -55,11 +56,11 @@ public class FloodFillTool implements BlockTool {
 
         int initialType = world.getBlockType(clicked.toVector());
 
-        if (initialType == BlockID.AIR) {
+        if (initialType == Blocks.AIR.getId()) {
             return true;
         }
 
-        if (initialType == BlockID.BEDROCK && !player.canDestroyBedrock()) {
+        if (initialType == Blocks.BEDROCK.getId() && !player.canDestroyBedrock()) {
             return true;
         }
 

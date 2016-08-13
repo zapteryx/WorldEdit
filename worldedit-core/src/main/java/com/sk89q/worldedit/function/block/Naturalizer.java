@@ -28,6 +28,7 @@ import com.sk89q.worldedit.blocks.BlockID;
 import com.sk89q.worldedit.function.LayerFunction;
 import com.sk89q.worldedit.function.mask.BlockMask;
 import com.sk89q.worldedit.function.mask.Mask;
+import com.sk89q.worldedit.world.registry.Blocks;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,9 +39,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Naturalizer implements LayerFunction {
 
-    private static final BaseBlock GRASS = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.GRASS);
-    private static final BaseBlock DIRT = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.DIRT);
-    private static final BaseBlock STONE = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(BlockID.STONE);
+    private static final BaseBlock GRASS = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.GRASS.getId());
+    private static final BaseBlock DIRT = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.DIRT.getId());
+    private static final BaseBlock STONE = WorldEdit.getInstance().getBaseBlockFactory().getBaseBlock(Blocks.STONE.getId());
 
     private final EditSession editSession;
     private final Mask mask;

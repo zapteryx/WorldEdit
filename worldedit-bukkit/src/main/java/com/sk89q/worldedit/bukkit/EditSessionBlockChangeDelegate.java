@@ -24,6 +24,8 @@ import com.sk89q.worldedit.MaxChangedBlocksException;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.WorldEdit;
 import com.sk89q.worldedit.blocks.BlockID;
+import com.sk89q.worldedit.world.registry.BlockDescriptor;
+import com.sk89q.worldedit.world.registry.Blocks;
 import org.bukkit.BlockChangeDelegate;
 
 /**
@@ -77,7 +79,7 @@ public class EditSessionBlockChangeDelegate implements BlockChangeDelegate {
 
     @Override
     public boolean isEmpty(int x, int y, int z) {
-        return editSession.getBlockType(new Vector(x, y, z)) == BlockID.AIR;
+        return editSession.getLazyBlock(new Vector(x, y, z)).getId() == Blocks.AIR.getId();
     }
 
 }
