@@ -47,14 +47,12 @@ public class BlockDataCyler implements DoubleActionBlockTool {
         return player.hasPermission("worldedit.tool.data-cycler");
     }
 
-    private Map<UUID, Property<?>> selectedProperties = new HashMap<>();
-
     private boolean handleCycle(Platform server, LocalConfiguration config,
             Player player, LocalSession session, Location clicked, boolean forward) {
 
         World world = (World) clicked.getExtent();
 
-        BlockState block = world.getBlock(clicked.toVector());
+        BlockStateHolder block = world.getBlock(clicked.toVector());
 
         if (!config.allowedDataCycleBlocks.isEmpty()
                 && !player.hasPermission("worldedit.override.data-cycler")
@@ -63,39 +61,22 @@ public class BlockDataCyler implements DoubleActionBlockTool {
             return true;
         }
 
-        if (block.getStates().keySet().isEmpty()) {
+        if (block.getBlockType().getProperties().isEmpty()) {
             player.printError("That block's data cannot be cycled!");
         } else {
-            Property currentProperty = selectedProperties.get(player.getUniqueId());
+            BlockStateHolder newBlock = block;
 
-            if (currentProperty == null || (forward && block.getState(currentProperty) == null)) {
-                currentProperty = block.getStates().keySet().stream().findFirst().get();
-                selectedProperties.put(player.getUniqueId(), currentProperty);
-            }
+            // TODO Forward = cycle value, Backward = Next property
+            //        int increment = forward ? 1 : -1;
+            //        BaseBlock newBlock = new BaseBlock(type, BlockData.cycle(type, data, increment));
+            EditSession editSession = session.createEditSession(player);
 
-            if (forward) {
-                block.getState(currentProperty);
-                int index = currentProperty.getValues().indexOf(block.getState(currentProperty));
-                index = (index + 1) % currentProperty.getValues().size();
-                BlockState newBlock = block.with(currentProperty, currentProperty.getValues().get(index));
-
-                EditSession editSession = session.createEditSession(player);
-
-                try {
-                    editSession.setBlock(clicked.toVector(), newBlock);
-                    player.print("Value of " + currentProperty.getName() + " is now " + currentProperty.getValues().get(index).toString());
-                } catch (MaxChangedBlocksException e) {
-                    player.printError("Max blocks change limit reached.");
-                } finally {
-                    session.remember(editSession);
-                }
-            } else {
-                List<Property<?>> properties = Lists.newArrayList(block.getStates().keySet());
-                int index = properties.indexOf(currentProperty);
-                index = (index + 1) % properties.size();
-                currentProperty = properties.get(index);
-                selectedProperties.put(player.getUniqueId(), currentProperty);
-                player.print("Now cycling " + currentProperty.getName());
+            try {
+                editSession.setBlock(clicked.toVector(), newBlock);
+            } catch (MaxChangedBlocksException e) {
+                player.printError("Max blocks change limit reached.");
+            } finally {
+                session.remember(editSession);
             }
         }
 

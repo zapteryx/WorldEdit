@@ -29,10 +29,10 @@ import javax.annotation.Nullable;
 /**
  * The {@code TAG_List} tag.
  */
-public final class ListTag extends Tag {
+public final class ListTag<T extends Tag> extends Tag {
 
-    private final Class<? extends Tag> type;
-    private final List<Tag> value;
+    private final Class<T> type;
+    private final List<T> value;
 
     /**
      * Creates the tag with an empty name.
@@ -40,11 +40,20 @@ public final class ListTag extends Tag {
      * @param type the type of tag
      * @param value the value of the tag
      */
-    public ListTag(Class<? extends Tag> type, List<? extends Tag> value) {
+    public ListTag(Class<T> type, List<T> value) {
         super();
         checkNotNull(value);
         this.type = type;
-        this.value = Collections.unmodifiableList(value);
+        this.value = value;
+    }
+
+    @Override
+    public List<Object> getRaw() {
+        ArrayList<Object> raw = new ArrayList<>();
+        for (Tag t : value) {
+            raw.add(t.getRaw());
+        }
+        return raw;
     }
 
     /**
@@ -52,12 +61,12 @@ public final class ListTag extends Tag {
      *
      * @return The type of item in this list.
      */
-    public Class<? extends Tag> getType() {
+    public Class<T> getType() {
         return type;
     }
 
     @Override
-    public List<Tag> getValue() {
+    public List<T> getValue() {
         return value;
     }
 
@@ -73,16 +82,17 @@ public final class ListTag extends Tag {
 
     /**
      * Get the tag if it exists at the given index.
-     * 
+     *
      * @param index the index
      * @return the tag or null
      */
     @Nullable
     public Tag getIfExists(int index) {
-        if (index >= value.size()) {
+        try {
+            return value.get(index);
+        } catch (NoSuchElementException e) {
             return null;
         }
-        return value.get(index);
     }
 
     /**
@@ -426,5 +436,7 @@ public final class ListTag extends Tag {
         bldr.append("}");
         return bldr.toString();
     }
+
+
 
 }

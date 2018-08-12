@@ -130,16 +130,17 @@ public class ExtendingCuboidRegionSelector extends CuboidRegionSelector {
 
     @Override
     public void explainPrimarySelection(Actor player, LocalSession session, Vector pos) {
-        player.print("Started selection at " + pos + " (" + region.getArea() + ").");
+        BBC.SELECTOR_POS.send(player, 1, pos, region.getArea());
 
         explainRegionAdjust(player, session);
     }
 
     @Override
     public void explainSecondarySelection(Actor player, LocalSession session, Vector pos) {
-        player.print("Extended selection to encompass " + pos + " (" + region.getArea() + ").");
+        BBC.SELECTOR_EXPANDED.send(player, pos, region.getArea());
 
         explainRegionAdjust(player, session);
     }
+
 
 }

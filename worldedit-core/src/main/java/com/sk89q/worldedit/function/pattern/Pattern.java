@@ -24,8 +24,21 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 
 /**
  * Returns a {@link BlockStateHolder} for a given position.
+ * @deprecated Use FawePattern
  */
-public interface Pattern {
+@Link(clazz = UtilityCommands.class, value = "patterns")
+@Deprecated
+public interface Pattern extends com.sk89q.worldedit.patterns.Pattern{
+
+    @Override
+    default BaseBlock next(Vector position) {
+        return new BaseBlock(apply(position));
+    }
+
+    @Override
+    default BaseBlock next(int x, int y, int z) {
+        return new BaseBlock(apply(new Vector(x, y, z)));
+    }
 
     /**
      * Return a {@link BlockStateHolder} for the given position.
@@ -33,6 +46,10 @@ public interface Pattern {
      * @param position the position
      * @return a block
      */
+    @Deprecated
     BlockStateHolder apply(Vector position);
 
+    default boolean apply(Extent extent, Vector get, Vector set) throws WorldEditException {
+        return extent.setBlock(set, apply(get));
+    }
 }

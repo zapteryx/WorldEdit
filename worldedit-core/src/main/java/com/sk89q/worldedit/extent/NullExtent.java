@@ -46,6 +46,8 @@ public class NullExtent implements Extent {
 
     private final Vector nullPoint = new Vector(0, 0, 0);
 
+    public static final NullExtent INSTANCE = new NullExtent();
+
     @Override
     public Vector getMinimumPoint() {
         return nullPoint;
@@ -78,8 +80,13 @@ public class NullExtent implements Extent {
     }
 
     @Override
-    public BaseBlock getFullBlock(Vector position) {
-        return getBlock(position).toBaseBlock();
+    public BlockState getLazyBlock(Vector position) {
+        return BlockTypes.AIR.getDefaultState();
+    }
+
+    @Override
+    public BlockState getFullBlock(Vector position) {
+        return new BaseBlock(getBlock(position));
     }
 
     @Nullable

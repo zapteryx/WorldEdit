@@ -25,13 +25,13 @@ import java.util.Arrays;
  * Tracks a command registration.
  */
 public class SimpleCommandMapping implements CommandMapping {
-    
+
     private final String[] aliases;
     private final CommandCallable callable;
-    
+
     /**
      * Create a new instance.
-     * 
+     *
      * @param callable the command callable
      * @param alias a list of all aliases, where the first one is the primary one
      */
@@ -45,12 +45,12 @@ public class SimpleCommandMapping implements CommandMapping {
     public String getPrimaryAlias() {
         return aliases[0];
     }
-    
+
     @Override
     public String[] getAllAliases() {
         return aliases;
     }
-    
+
     @Override
     public CommandCallable getCallable() {
         return callable;
@@ -62,11 +62,37 @@ public class SimpleCommandMapping implements CommandMapping {
     }
 
     @Override
+    public int hashCode() {
+        return getPrimaryAlias().hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof CommandMapping)) {
+            return false;
+        }
+        CommandMapping other = (CommandMapping) obj;
+        if (other.getCallable() != getCallable()) {
+            if (other.getCallable().getClass() != getCallable().getClass() || !(getCallable() instanceof ParametricCallable)) {
+                return false;
+            }
+            Method oMeth = ((ParametricCallable) other.getCallable()).getMethod();
+            Method meth = ((ParametricCallable) getCallable()).getMethod();
+            if (!oMeth.equals(meth)) {
+                return false;
+            }
+        }
+        return other.getPrimaryAlias().equals(getPrimaryAlias());
+    }
+
+    @Override
     public String toString() {
         return "CommandMapping{" +
                 "aliases=" + Arrays.toString(aliases) +
                 ", callable=" + callable +
                 '}';
     }
+
+
 
 }

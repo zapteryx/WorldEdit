@@ -75,7 +75,13 @@ public class PropertiesConfiguration extends LocalConfiguration {
         loadExtra();
 
         profile = getBool("profile", profile);
-        disallowedBlocks = getStringSet("disallowed-blocks", defaultDisallowedBlocks);
+
+        disallowedBlocks =
+            new HashSet<>(getStringSet("limits.disallowed-blocks", defaultDisallowedBlocks))
+            .stream().map(e -> BlockTypes.parse(e)).collect(Collectors.toSet());
+        allowedDataCycleBlocks =
+                new HashSet<>(getStringSet("limits.allowed-data-cycle-blocks", null))
+                .stream().map(e -> BlockTypes.parse(e)).collect(Collectors.toSet());
         defaultChangeLimit = getInt("default-max-changed-blocks", defaultChangeLimit);
         maxChangeLimit = getInt("max-changed-blocks", maxChangeLimit);
         defaultMaxPolygonalPoints = getInt("default-max-polygon-points", defaultMaxPolygonalPoints);
@@ -90,22 +96,14 @@ public class PropertiesConfiguration extends LocalConfiguration {
         logFile = getString("log-file", logFile);
         logFormat = getString("log-format", logFormat);
         registerHelp = getBool("register-help", registerHelp);
-        wandItem = getString("wand-item", wandItem);
-        try {
-            wandItem = LegacyMapper.getInstance().getItemFromLegacy(Integer.parseInt(wandItem)).getId();
-        } catch (Throwable e) {
-        }
+        wandItem = ItemTypes.parse(getString("wand-item", wandItem.getId()));
         superPickaxeDrop = getBool("super-pickaxe-drop-items", superPickaxeDrop);
         superPickaxeManyDrop = getBool("super-pickaxe-many-drop-items", superPickaxeManyDrop);
         noDoubleSlash = getBool("no-double-slash", noDoubleSlash);
         useInventory = getBool("use-inventory", useInventory);
         useInventoryOverride = getBool("use-inventory-override", useInventoryOverride);
         useInventoryCreativeOverride = getBool("use-inventory-creative-override", useInventoryCreativeOverride);
-        navigationWand = getString("nav-wand-item", navigationWand);
-        try {
-            navigationWand = LegacyMapper.getInstance().getItemFromLegacy(Integer.parseInt(navigationWand)).getId();
-        } catch (Throwable e) {
-        }
+        navigationWand = ItemTypes.parse(getString("navigation-wand.item", navigationWand.getId()));
         navigationWandMaxDistance = getInt("nav-wand-distance", navigationWandMaxDistance);
         navigationUseGlass = getBool("nav-use-glass", navigationUseGlass);
         scriptTimeout = getInt("scripting-timeout", scriptTimeout);

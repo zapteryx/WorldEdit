@@ -48,4 +48,11 @@ public interface BlockRegistry {
      */
     Map<String, ? extends Property> getProperties(BlockType blockType);
 
+
+    /**
+     * Register all blocks
+     */
+    default Collection<String> registerBlocks() {
+        return Collections.emptyList();
+    }
 }

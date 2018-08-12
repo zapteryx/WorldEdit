@@ -38,18 +38,25 @@ import javax.annotation.Nullable;
  */
 public class BlockBagExtent extends AbstractDelegateExtent {
 
-    private Map<BlockType, Integer> missingBlocks = new HashMap<>();
+    private final boolean mine;
+    private int[] missingBlocks = new int[BlockTypes.size()];
     private BlockBag blockBag;
 
     /**
      * Create a new instance.
      *
-     * @param extent the extent
+     * @param extent   the extent
      * @param blockBag the block bag
      */
-    public BlockBagExtent(Extent extent, @Nullable BlockBag blockBag) {
+    public BlockBagExtent(Extent extent, @Nonnull BlockBag blockBag) {
+        this(extent, blockBag, false);
+    }
+
+    public BlockBagExtent(Extent extent, @Nonnull BlockBag blockBag, boolean mine) {
         super(extent);
+        checkNotNull(blockBag);
         this.blockBag = blockBag;
+        this.mine = mine;
     }
 
     /**
@@ -57,7 +64,9 @@ public class BlockBagExtent extends AbstractDelegateExtent {
      *
      * @return a block bag, which may be null if none is used
      */
-    public @Nullable BlockBag getBlockBag() {
+    public
+    @Nullable
+    BlockBag getBlockBag() {
         return blockBag;
     }
 
@@ -77,39 +86,47 @@ public class BlockBagExtent extends AbstractDelegateExtent {
      * @return a map of missing blocks
      */
     public Map<BlockType, Integer> popMissing() {
-        Map<BlockType, Integer> missingBlocks = this.missingBlocks;
-        this.missingBlocks = new HashMap<>();
-        return missingBlocks;
+        HashMap<BlockType, Integer> map = new HashMap<>();
+        for (int i = 0; i < missingBlocks.length; i++) {
+            int count = missingBlocks[i];
+            if (count > 0) {
+                map.put(BlockTypes.get(i), count);
+            }
+        }
+        Arrays.fill(missingBlocks, 0);
+        return map;
     }
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block) throws WorldEditException {
-        if (blockBag != null) {
-            BlockState existing = getExtent().getBlock(position);
+    public boolean setBlock(Vector pos, BlockStateHolder block) throws WorldEditException {
+        return setBlock(pos.getBlockX(), pos.getBlockY(), pos.getBlockZ(), block);
+    }
 
-            if (block.getBlockType() != BlockTypes.AIR) {
-                try {
-                    blockBag.fetchPlacedBlock(block.toImmutableState());
-                } catch (UnplaceableBlockException e) {
-                    return false;
-                } catch (BlockBagException e) {
-                    if (!missingBlocks.containsKey(block.getBlockType())) {
-                        missingBlocks.put(block.getBlockType(), 1);
-                    } else {
-                        missingBlocks.put(block.getBlockType(), missingBlocks.get(block.getBlockType()) + 1);
-                    }
-                    return false;
-                }
+    @Override
+    public boolean setBlock(int x, int y, int z, BlockStateHolder block) throws WorldEditException {
+        BlockType type = block.getBlockType();
+        if (!type.getMaterial().isAir()) {
+            try {
+                blockBag.fetchPlacedBlock(block.toImmutableState());
+            } catch (UnplaceableBlockException e) {
+                throw new FaweException.FaweBlockBagException();
+            } catch (BlockBagException e) {
+                missingBlocks[type.getInternalId()]++;
+                throw new FaweException.FaweBlockBagException();
             }
-
-            if (existing.getBlockType() != BlockTypes.AIR) {
+        }
+        if (mine) {
+            BlockStateHolder lazyBlock = getExtent().getLazyBlock(x, y, z);
+            BlockType fromType = lazyBlock.getBlockType();
+            if (!fromType.getMaterial().isAir()) {
                 try {
-                    blockBag.storeDroppedBlock(existing);
+                    blockBag.storeDroppedBlock(fromType.getDefaultState());
                 } catch (BlockBagException ignored) {
                 }
             }
         }
-
-        return super.setBlock(position, block);
+        return getExtent().setBlock(x, y, z, block);
     }
+
+
 }

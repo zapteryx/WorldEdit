@@ -35,13 +35,13 @@ import com.sk89q.worldedit.regions.Region;
 
 /**
  * Helper class to 'bake' a transform into a clipboard.
- *
+ * <p>
  * <p>This class needs a better name and may need to be made more generic.</p>
  *
  * @see Clipboard
  * @see Transform
  */
-class FlattenedClipboardTransform {
+public class FlattenedClipboardTransform {
 
     private final Clipboard original;
     private final Transform transform;
@@ -49,7 +49,7 @@ class FlattenedClipboardTransform {
     /**
      * Create a new instance.
      *
-     * @param original the original clipboard
+     * @param original  the original clipboard
      * @param transform the transform
      */
     private FlattenedClipboardTransform(Clipboard original, Transform transform) {
@@ -75,18 +75,20 @@ class FlattenedClipboardTransform {
                         transform,
                         new AffineTransform().translate(original.getOrigin()));
 
-        Vector[] corners = new Vector[] {
+        // new Vector(minimum.getX(), minimum.getY(), minimum.getZ())
+        // new Vector(maximum.getX(), maximum.getY(), maximum.getZ())
+        Vector[] corners = new Vector[]{
                 minimum,
                 maximum,
-                minimum.setX(maximum.getX()),
-                minimum.setY(maximum.getY()),
-                minimum.setZ(maximum.getZ()),
-                maximum.setX(minimum.getX()),
-                maximum.setY(minimum.getY()),
-                maximum.setZ(minimum.getZ()) };
+                new Vector(maximum.getX(), minimum.getY(), minimum.getZ()),
+                new Vector(minimum.getX(), maximum.getY(), minimum.getZ()),
+                new Vector(minimum.getX(), minimum.getY(), maximum.getZ()),
+                new Vector(minimum.getX(), maximum.getY(), maximum.getZ()),
+                new Vector(maximum.getX(), minimum.getY(), maximum.getZ()),
+                new Vector(maximum.getX(), maximum.getY(), minimum.getZ())};
 
         for (int i = 0; i < corners.length; i++) {
-            corners[i] = transformAround.apply(corners[i]);
+            corners[i] = transformAround.apply(new Vector(corners[i]));
         }
 
         Vector newMinimum = corners[0];
@@ -99,13 +101,9 @@ class FlattenedClipboardTransform {
 
         // After transformation, the points may not really sit on a block,
         // so we should expand the region for edge cases
-        newMinimum = newMinimum.setX(Math.floor(newMinimum.getX()));
-        newMinimum = newMinimum.setY(Math.floor(newMinimum.getY()));
-        newMinimum = newMinimum.setZ(Math.floor(newMinimum.getZ()));
-
-        newMaximum = newMaximum.setX(Math.ceil(newMaximum.getX()));
-        newMaximum = newMaximum.setY(Math.ceil(newMaximum.getY()));
-        newMaximum = newMaximum.setZ(Math.ceil(newMaximum.getZ()));
+        newMinimum.mutX(Math.ceil(Math.floor(newMinimum.getX())));
+        newMinimum.mutY(Math.ceil(Math.floor(newMinimum.getY())));
+        newMinimum.mutZ(Math.ceil(Math.floor(newMinimum.getZ())));
 
         return new CuboidRegion(newMinimum, newMaximum);
     }
@@ -117,7 +115,8 @@ class FlattenedClipboardTransform {
      * @return the operation
      */
     public Operation copyTo(Extent target) {
-        BlockTransformExtent extent = new BlockTransformExtent(original, transform);
+        Extent extent = original;
+        if (transform != null && !transform.isIdentity()) extent = new BlockTransformExtent(original, transform);
         ForwardExtentCopy copy = new ForwardExtentCopy(extent, original.getRegion(), original.getOrigin(), target, original.getOrigin());
         copy.setTransform(transform);
         return copy;
@@ -126,12 +125,13 @@ class FlattenedClipboardTransform {
     /**
      * Create a new instance to bake the transform with.
      *
-     * @param original the original clipboard
+     * @param original  the original clipboard
      * @param transform the transform
      * @return a builder
      */
     public static FlattenedClipboardTransform transform(Clipboard original, Transform transform) {
         return new FlattenedClipboardTransform(original, transform);
     }
+
 
 }

@@ -59,9 +59,9 @@ public class FloodFillTool implements BlockTool {
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, Location clicked) {
         World world = (World) clicked.getExtent();
 
-        BlockType initialType = world.getBlock(clicked.toVector()).getBlockType();
+        BlockType initialType = world.getBlockType(clicked.toVector());
 
-        if (initialType == BlockTypes.AIR) {
+        if (initialType.getMaterial().isAir()) {
             return true;
         }
 
@@ -72,19 +72,18 @@ public class FloodFillTool implements BlockTool {
         EditSession editSession = session.createEditSession(player);
 
         try {
-            recurse(editSession, clicked.toVector().toBlockVector(),
-                    clicked.toVector(), range, initialType, new HashSet<>());
-        } catch (MaxChangedBlocksException e) {
-            player.printError("Max blocks change limit reached.");
-        } finally {
-            session.remember(editSession);
+            recurse(editSession, world, clicked.toVector().toBlockVector(),
+                    clicked.toVector(), range, initialType, new HashSet<BlockVector>());
+        } catch (WorldEditException e) {
+            throw new RuntimeException(e);
         }
-
+        editSession.flushQueue();
+        session.remember(editSession);
         return true;
     }
 
-    private void recurse(EditSession editSession, BlockVector pos, Vector origin, int size, BlockType initialType,
-            Set<BlockVector> visited) throws MaxChangedBlocksException {
+    private void recurse(EditSession editSession, World world, BlockVector pos, Vector origin, int size, BlockType initialType,
+                         Set<BlockVector> visited) throws WorldEditException {
 
         if (origin.distance(pos) > size || visited.contains(pos)) {
             return;
@@ -98,18 +97,19 @@ public class FloodFillTool implements BlockTool {
             return;
         }
 
-        recurse(editSession, pos.add(1, 0, 0).toBlockVector(),
+        recurse(editSession, world, pos.add(1, 0, 0).toBlockVector(),
                 origin, size, initialType, visited);
-        recurse(editSession, pos.add(-1, 0, 0).toBlockVector(),
+        recurse(editSession, world, pos.add(-1, 0, 0).toBlockVector(),
                 origin, size, initialType, visited);
-        recurse(editSession, pos.add(0, 0, 1).toBlockVector(),
+        recurse(editSession, world, pos.add(0, 0, 1).toBlockVector(),
                 origin, size, initialType, visited);
-        recurse(editSession, pos.add(0, 0, -1).toBlockVector(),
+        recurse(editSession, world, pos.add(0, 0, -1).toBlockVector(),
                 origin, size, initialType, visited);
-        recurse(editSession, pos.add(0, 1, 0).toBlockVector(),
+        recurse(editSession, world, pos.add(0, 1, 0).toBlockVector(),
                 origin, size, initialType, visited);
-        recurse(editSession, pos.add(0, -1, 0).toBlockVector(),
+        recurse(editSession, world, pos.add(0, -1, 0).toBlockVector(),
                 origin, size, initialType, visited);
     }
+
 
 }

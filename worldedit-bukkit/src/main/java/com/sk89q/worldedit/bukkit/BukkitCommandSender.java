@@ -34,7 +34,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-public class BukkitCommandSender implements Actor {
+public class BukkitCommandSender implements Actor, Metadatable {
 
     /**
      * One time generated ID.
@@ -43,6 +43,7 @@ public class BukkitCommandSender implements Actor {
 
     private CommandSender sender;
     private WorldEditPlugin plugin;
+    private ConcurrentHashMap<String, Object> meta;
 
     public BukkitCommandSender(WorldEditPlugin plugin, CommandSender sender) {
         checkNotNull(plugin);
@@ -51,6 +52,12 @@ public class BukkitCommandSender implements Actor {
 
         this.plugin = plugin;
         this.sender = sender;
+    }
+
+    @Override
+    public synchronized Map<String, Object> getMetaMap() {
+        if (meta == null) meta = new ConcurrentHashMap<>();
+        return meta;
     }
 
     @Override

@@ -298,16 +298,15 @@ public class YAMLProcessor extends YAMLNode {
 
     // This will be included in snakeyaml 1.10, but until then we have to do it manually.
     private class FancyDumperOptions extends DumperOptions {
-        @Override
-        public DumperOptions.ScalarStyle calculateScalarStyle(ScalarAnalysis analysis,
-                                                              DumperOptions.ScalarStyle style) {
-            if (format == YAMLFormat.EXTENDED
-                    && (analysis.scalar.contains("\n") || analysis.scalar.contains("\r"))) {
-                return ScalarStyle.LITERAL;
-            } else {
-                return super.calculateScalarStyle(analysis, style);
-            }
-        }
+//        @Override
+//        public DumperOptions.ScalarStyle calculateScalarStyle(ScalarAnalysis analysis,
+//                                                              DumperOptions.ScalarStyle style) {
+//            if (format == YAMLFormat.EXTENDED && (analysis.scalar.contains("\n") || analysis.scalar.contains("\r"))) {
+//                return ScalarStyle.LITERAL;
+//            } else {
+//                return super.calculateScalarStyle(analysis, style);
+//            }
+//        }
     }
 
     private static class FancyRepresenter extends Representer {
@@ -315,5 +314,4 @@ public class YAMLProcessor extends YAMLNode {
             this.nullRepresenter = o -> representScalar(Tag.NULL, "");
         }
     }
-
 }

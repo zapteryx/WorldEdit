@@ -35,22 +35,31 @@ import java.util.List;
  */
 public class FlatRegionVisitor implements Operation {
 
-    private final FlatRegion flatRegion;
     private final FlatRegionFunction function;
+    private MappedFaweQueue queue;
     private int affected = 0;
+    private final Iterable<Vector2D> iterator;
 
     /**
      * Create a new visitor.
      *
      * @param flatRegion a flat region
-     * @param function a function to apply to columns
+     * @param function   a function to apply to columns
      */
-    public FlatRegionVisitor(FlatRegion flatRegion, FlatRegionFunction function) {
+    public FlatRegionVisitor(final FlatRegion flatRegion, final FlatRegionFunction function) {
         checkNotNull(flatRegion);
         checkNotNull(function);
-
-        this.flatRegion = flatRegion;
         this.function = function;
+        this.iterator = flatRegion.asFlatRegion();
+    }
+
+    public FlatRegionVisitor(final FlatRegion flatRegion, final FlatRegionFunction function, HasFaweQueue hasFaweQueue) {
+        checkNotNull(flatRegion);
+        checkNotNull(function);
+        this.function = function;
+        this.iterator = flatRegion.asFlatRegion();
+        FaweQueue queue = hasFaweQueue.getQueue();
+        this.queue = (MappedFaweQueue) (queue instanceof MappedFaweQueue ? queue : null);
     }
 
     /**
@@ -59,17 +68,20 @@ public class FlatRegionVisitor implements Operation {
      * @return the number of affected
      */
     public int getAffected() {
-        return affected;
+        return this.affected;
     }
 
     @Override
-    public Operation resume(RunContext run) throws WorldEditException {
-        for (Vector2D pt : flatRegion.asFlatRegion()) {
-            if (function.apply(pt)) {
-                affected++;
+    public Operation resume(final RunContext run) throws WorldEditException {
+        if (this.queue != null) {
+            for (final Vector2D pt : new Fast2DIterator(this.iterator, queue)) {
+                if (this.function.apply(pt)) affected++;
+            }
+        } else {
+            for (final Vector2D pt : this.iterator) {
+                if (this.function.apply(pt)) affected++;
             }
         }
-
         return null;
     }
 
@@ -78,9 +90,10 @@ public class FlatRegionVisitor implements Operation {
     }
 
     @Override
-    public void addStatusMessages(List<String> messages) {
-        messages.add(getAffected() + " columns affected");
+    public void addStatusMessages(final List<String> messages) {
+        messages.add(BBC.VISITOR_FLAT.format(getAffected()));
     }
 
-}
 
+
+}

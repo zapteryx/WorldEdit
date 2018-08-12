@@ -35,7 +35,7 @@ import javax.annotation.Nullable;
 /**
  * An interface for adapters of various Bukkit implementations.
  */
-public interface BukkitImplAdapter {
+public interface BukkitImplAdapter<T> {
 
     /**
      * Get the biome ID for the given biome.
@@ -63,7 +63,7 @@ public interface BukkitImplAdapter {
      * @param location the location
      * @return the block
      */
-    BaseBlock getBlock(Location location);
+    BlockState getBlock(Location location);
 
     /**
      * Set the block at the given location.
@@ -101,4 +101,12 @@ public interface BukkitImplAdapter {
      * @return The properties map
      */
     Map<String, ? extends Property> getProperties(BlockType blockType);
+
+    default Tag toNative(T foreign) {
+        return null;
+    }
+
+    default T fromNative(Tag foreign) {
+        return null;
+    }
 }

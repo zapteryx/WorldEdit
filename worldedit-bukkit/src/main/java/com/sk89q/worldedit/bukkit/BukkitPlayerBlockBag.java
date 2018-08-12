@@ -30,7 +30,7 @@ import com.sk89q.worldedit.world.block.BlockTypes;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
-public class BukkitPlayerBlockBag extends BlockBag {
+public class BukkitPlayerBlockBag extends BlockBag implements SlottableBlockBag {
 
     private Player player;
     private ItemStack[] items;
@@ -181,4 +181,16 @@ public class BukkitPlayerBlockBag extends BlockBag {
     public void addSingleSourcePosition(Location pos) {
     }
 
+    @Override
+    public BaseItem getItem(int slot) {
+        loadInventory();
+        return BukkitAdapter.adapt(items[slot]);
+    }
+
+    @Override
+    public void setItem(int slot, BaseItem block) {
+        loadInventory();
+        BaseItemStack stack = block instanceof BaseItemStack ? (BaseItemStack) block : new BaseItemStack(block.getType(), block.getNbtData(), 1);
+        items[slot] = BukkitAdapter.adapt(stack);
+    }
 }

@@ -35,13 +35,17 @@ public class CommandListBox extends MessageBox {
     }
 
     public CommandListBox appendCommand(String alias, String description) {
+        return appendCommand(alias, description, true);
+    }
+
+    public CommandListBox appendCommand(String alias, String description, boolean allowed) {
         if (!first) {
             getContents().newLine();
         }
-        getContents().createFragment(Style.YELLOW_DARK).append(alias).append(": ");
-        getContents().append(description);
+        getContents().append((allowed ? BBC.HELP_ITEM_ALLOWED : BBC.HELP_ITEM_DENIED).format(alias, description));
         first = false;
         return this;
     }
+
 
 }

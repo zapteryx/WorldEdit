@@ -153,8 +153,8 @@ public class OldChunk implements Chunk {
     }
 
     @Override
-    public BaseBlock getBlock(Vector position) throws DataException {
-        if(position.getBlockY() >= 128) BlockTypes.AIR.getDefaultState().toBaseBlock();
+    public BlockState getBlock(Vector position) throws DataException {
+        if(position.getBlockY() >= 128) return BlockTypes.AIR.getDefaultState();
         int id, dataVal;
 
         int x = position.getBlockX() - rootX * 16;
@@ -181,9 +181,11 @@ public class OldChunk implements Chunk {
         }
 
         BlockState state = LegacyMapper.getInstance().getBlockFromLegacy(id, dataVal);
-        CompoundTag tileEntity = getBlockTileEntity(position);
-
-        return state.toBaseBlock(tileEntity);
+        if (state.getBlockType().getMaterial().hasContainer()) {
+            CompoundTag tileEntity = getBlockTileEntity(position);
+            if (tileEntity != null) return new BaseBlock(state, tileEntity);
+        }
+        return state;
     }
 
 }

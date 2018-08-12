@@ -24,6 +24,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Basic storage object to represent a given biome.
  */
+@Link(clazz = BiomeCommands.class, value = "biomelist")
 public class BaseBiome {
 
     private int id;
@@ -79,4 +80,7 @@ public class BaseBiome {
     public int hashCode() {
         return id;
     }
+
+
+
 }

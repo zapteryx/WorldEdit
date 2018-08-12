@@ -30,7 +30,6 @@ import java.util.Map;
 public final class CompoundTag extends Tag {
 
     private final Map<String, Tag> value;
-
     /**
      * Creates the tag with an empty name.
      *
@@ -38,7 +37,16 @@ public final class CompoundTag extends Tag {
      */
     public CompoundTag(Map<String, Tag> value) {
         super();
-        this.value = Collections.unmodifiableMap(value);
+        this.value = value;
+    }
+
+    @Override
+    public Map<String, Object> getRaw() {
+        HashMap<String, Object> raw = new HashMap<>();
+        for (Map.Entry<String, Tag> entry : value.entrySet()) {
+            raw.put(entry.getKey(), entry.getValue().getRaw());
+        }
+        return raw;
     }
 
     /**
@@ -72,7 +80,7 @@ public final class CompoundTag extends Tag {
      * @return the builder
      */
     public CompoundTagBuilder createBuilder() {
-        return new CompoundTagBuilder(new HashMap<>(value));
+        return new CompoundTagBuilder(new HashMap<String, Tag>(value));
     }
 
     /**
@@ -434,5 +442,6 @@ public final class CompoundTag extends Tag {
         bldr.append("}");
         return bldr.toString();
     }
+
 
 }

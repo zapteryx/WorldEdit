@@ -141,12 +141,7 @@ public class SpongeSchematicReader extends NBTSchematicReader {
 
         for (String palettePart : paletteObject.keySet()) {
             int id = requireTag(paletteObject, palettePart, IntTag.class).getValue();
-            BlockState state;
-            try {
-                state = WorldEdit.getInstance().getBlockFactory().parseFromInput(palettePart, parserContext).toImmutableState();
-            } catch (InputParseException e) {
-                throw new IOException("Invalid BlockState in schematic: " + palettePart + ". Are you missing a mod of using a schematic made in a newer version of Minecraft?");
-            }
+            BlockState state = BlockState.get(palettePart);
             palette.put(id, state);
         }
 
@@ -154,10 +149,9 @@ public class SpongeSchematicReader extends NBTSchematicReader {
 
         Map<BlockVector, Map<String, Tag>> tileEntitiesMap = new HashMap<>();
         try {
-            List<Map<String, Tag>> tileEntityTags = requireTag(schematic, "TileEntities", ListTag.class).getValue().stream()
-                    .map(tag -> (CompoundTag) tag)
-                    .map(CompoundTag::getValue)
-                    .collect(Collectors.toList());
+            List<Map<String, Tag>> tileEntityTags = ((ListTag<CompoundTag>) requireTag(schematic, "TileEntities", ListTag.class)).getValue().stream()
+            .map(CompoundTag::getValue)
+            .collect(Collectors.toList());
 
             for (Map<String, Tag> tileEntity : tileEntityTags) {
                 int[] pos = requireTag(tileEntity, "Pos", IntArrayTag.class).getValue();
@@ -196,7 +190,7 @@ public class SpongeSchematicReader extends NBTSchematicReader {
             BlockState state = palette.get(value);
             BlockVector pt = new BlockVector(x, y, z);
             try {
-                if (tileEntitiesMap.containsKey(pt)) {
+                if (state.getBlockType().getMaterial().hasContainer() && tileEntitiesMap.containsKey(pt)) {
                     Map<String, Tag> values = Maps.newHashMap(tileEntitiesMap.get(pt));
                     for (NBTCompatibilityHandler handler : COMPATIBILITY_HANDLERS) {
                         if (handler.isAffectedBlock(state)) {
@@ -209,7 +203,7 @@ public class SpongeSchematicReader extends NBTSchematicReader {
                     values.put("id", values.get("Id"));
                     values.remove("Id");
                     values.remove("Pos");
-                    clipboard.setBlock(pt, state.toBaseBlock(new CompoundTag(values)));
+                    clipboard.setBlock(pt, new BaseBlock(state, new CompoundTag(values)));
                 } else {
                     clipboard.setBlock(pt, state);
                 }

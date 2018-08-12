@@ -62,12 +62,61 @@ import javax.annotation.Nullable;
 public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
 
     private static final Logger log = Logger.getLogger(WorldEditPlugin.class.getCanonicalName());
-    public static final String CUI_PLUGIN_CHANNEL = "worldedit:cui";
+    private static final String CUI_PLUGIN_CHANNEL = "worldedit:cui";
     private static WorldEditPlugin INSTANCE;
 
     private BukkitImplAdapter bukkitAdapter;
     private BukkitServerInterface server;
     private BukkitConfiguration config;
+
+    private static Map<String, Plugin> lookupNames;
+    static {
+        {   // Disable AWE as otherwise both fail to load
+            PluginManager manager = Bukkit.getPluginManager();
+            try {
+                Field pluginsField = manager.getClass().getDeclaredField("plugins");
+                Field lookupNamesField = manager.getClass().getDeclaredField("lookupNames");
+                pluginsField.setAccessible(true);
+                lookupNamesField.setAccessible(true);
+                List<Plugin> plugins = (List<Plugin>) pluginsField.get(manager);
+                lookupNames = (Map<String, Plugin>) lookupNamesField.get(manager);
+                pluginsField.set(manager, plugins = new ArrayList<Plugin>(plugins) {
+                    @Override
+                    public boolean add(Plugin plugin) {
+                        if (plugin.getName().startsWith("AsyncWorldEdit")) {
+                            Fawe.debug("Disabling `" + plugin.getName() + "` as it is incompatible");
+                        } else if (plugin.getName().startsWith("BetterShutdown")) {
+                            Fawe.debug("Disabling `" + plugin.getName() + "` as it is incompatible (Improperly shaded classes from com.sk89q.minecraft.util.commands)");
+                        } else {
+                            return super.add(plugin);
+                        }
+                        return false;
+                    }
+                });
+                lookupNamesField.set(manager, lookupNames = new ConcurrentHashMap<String, Plugin>(lookupNames) {
+                    @Override
+                    public Plugin put(String key, Plugin plugin) {
+                        if (plugin.getName().startsWith("AsyncWorldEdit") || plugin.getName().startsWith("BetterShutdown")) {
+                            return null;
+                        }
+                        return super.put(key, plugin);
+                    }
+                });
+            } catch (Throwable ignore) {}
+        }
+    }
+
+    public WorldEditPlugin() {
+        if (lookupNames != null) lookupNames.putIfAbsent("WorldEdit".toLowerCase(Locale.ENGLISH), this);
+    }
+
+    public WorldEditPlugin(JavaPluginLoader loader, PluginDescriptionFile desc, File dataFolder, File jarFile) {
+        if (lookupNames != null) lookupNames.putIfAbsent("WorldEdit".toLowerCase(Locale.ENGLISH), this);
+    }
+
+    public static String getCuiPluginChannel() {
+        return CUI_PLUGIN_CHANNEL;
+    }
 
     /**
      * Called on plugin enable.
@@ -76,6 +125,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
     @Override
     public void onEnable() {
         this.INSTANCE = this;
+        FaweBukkit imp = new FaweBukkit(this);
 
         //noinspection ResultOfMethodCallIgnored
         getDataFolder().mkdirs();
@@ -90,11 +140,14 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
         worldEdit.loadMappings();
 
         loadConfig(); // Load configuration
-        PermissionsResolverManager.initialize(this); // Setup permission resolver
+        fail(() -> PermissionsResolverManager.initialize(INSTANCE), "Failed to initialize permissions resolver");
+
 
         // Register CUI
-        getServer().getMessenger().registerIncomingPluginChannel(this, CUI_PLUGIN_CHANNEL, new CUIChannelListener(this));
-        getServer().getMessenger().registerOutgoingPluginChannel(this, CUI_PLUGIN_CHANNEL);
+        fail(() -> {
+            getServer().getMessenger().registerIncomingPluginChannel(INSTANCE, CUI_PLUGIN_CHANNEL, new CUIChannelListener(INSTANCE));
+            getServer().getMessenger().registerOutgoingPluginChannel(INSTANCE, CUI_PLUGIN_CHANNEL);
+        }, "Failed to register CUI");
 
         // Now we can register events
         getServer().getPluginManager().registerEvents(new WorldEditListener(this), this);
@@ -103,13 +156,35 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
         // Forge WorldEdit and there's (probably) not going to be any other
         // platforms to be worried about... at the current time of writing
         WorldEdit.getInstance().getEventBus().post(new PlatformReadyEvent());
+
+        { // Register 1.13 Material ids with LegacyMapper
+            LegacyMapper legacyMapper = LegacyMapper.getInstance();
+            for (Material m : Material.values()) {
+                if (!m.isLegacy() && m.isBlock()) {
+                    legacyMapper.register(m.getId(), 0, BukkitAdapter.adapt(m).getDefaultState());
+                }
+            }
+        }
+    }
+
+    private void fail(Runnable run, String message) {
+        try {
+            run.run();
+        } catch (Throwable e) {
+            log.log(Level.SEVERE, message);
+            e.printStackTrace();
+        }
     }
 
     private void loadConfig() {
-        createDefaultConfiguration("config.yml"); // Create the default configuration file
-
-        config = new BukkitConfiguration(new YAMLProcessor(new File(getDataFolder(), "config.yml"), true), this);
-        config.load();
+        createDefaultConfiguration("config-legacy.yml"); // Create the default configuration file
+        try {
+            config = new BukkitConfiguration(new YAMLProcessor(new File(getDataFolder(), "config-legacy.yml"), true), this);
+            config.load();
+        } catch (Throwable e) {
+            log.log(Level.SEVERE, "Failed to load config.yml");
+            e.printStackTrace();
+        }
     }
 
     private void loadAdapter() {
@@ -117,6 +192,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
 
         // Attempt to load a Bukkit adapter
         BukkitImplLoader adapterLoader = new BukkitImplLoader();
+        adapterLoader.addClass(Spigot_v1_13_R1.class);
 
         try {
             adapterLoader.addFromPath(getClass().getClassLoader());
@@ -133,14 +209,18 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
             bukkitAdapter = adapterLoader.loadAdapter();
             log.log(Level.INFO, "Using " + bukkitAdapter.getClass().getCanonicalName() + " as the Bukkit adapter");
         } catch (AdapterLoadException e) {
-            Platform platform = worldEdit.getPlatformManager().queryCapability(Capability.WORLD_EDITING);
-            if (platform instanceof BukkitServerInterface) {
-                log.log(Level.WARNING, e.getMessage());
-            } else {
-                log.log(Level.INFO, "WorldEdit could not find a Bukkit adapter for this MC version, " +
-                        "but it seems that you have another implementation of WorldEdit installed (" + platform.getPlatformName() + ") " +
-                        "that handles the world editing.");
-            }
+            try {
+                Platform platform = worldEdit.getPlatformManager().queryCapability(Capability.WORLD_EDITING);
+                if (platform instanceof BukkitServerInterface) {
+                    log.log(Level.WARNING, e.getMessage());
+                    return;
+                } else {
+                    log.log(Level.INFO, "WorldEdit could not find a Bukkit adapter for this MC version, " +
+                            "but it seems that you have another implementation of WorldEdit installed (" + platform.getPlatformName() + ") " +
+                            "that handles the world editing.");
+                }
+            } catch (NoCapablePlatformException ignore) {}
+            log.log(Level.INFO, "WorldEdit could not find a Bukkit adapter for this MC version");
         }
     }
 
@@ -149,6 +229,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      */
     @Override
     public void onDisable() {
+        Fawe.get().onDisable();
         WorldEdit worldEdit = WorldEdit.getInstance();
         worldEdit.getSessionManager().clear();
         worldEdit.getPlatformManager().unregister(server);
@@ -342,7 +423,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      * @return an instance of the plugin
      * @throws NullPointerException if the plugin hasn't been enabled
      */
-    static WorldEditPlugin getInstance() {
+    public static WorldEditPlugin getInstance() {
         return checkNotNull(INSTANCE);
     }
 
@@ -352,7 +433,7 @@ public class WorldEditPlugin extends JavaPlugin implements TabCompleter {
      * @return the adapter
      */
     @Nullable
-    BukkitImplAdapter getBukkitImplAdapter() {
+    public BukkitImplAdapter getBukkitImplAdapter() {
         return bukkitAdapter;
     }
 

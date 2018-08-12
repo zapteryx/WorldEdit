@@ -34,18 +34,18 @@ import javax.annotation.Nullable;
 
 /**
  * Raised (several times) when a new {@link EditSession} is being instantiated.
- *
+ * <p>
  * <p></p>Block loggers, as well as block set interceptors, can use this event to wrap
  * the given {@link Extent} with their own, which would allow them to intercept
  * all changes made to the world. For example, the code below would wrap the
  * existing extent with a custom one, and the custom extent would receive
  * all method calls <strong>before</strong> the extent fetched from
  * {@link #getExtent()} would.</p>
- *
+ * <p>
  * <pre>
  * event.setExtent(new MyExtent(event.getExtent())
  * </pre>
- *
+ * <p>
  * <p></p>This event is fired several times during the creation of a single
  * {@link EditSession}, but {@link #getStage()} will differ each time.
  * The stage determines at which point {@link Extent}s added to this event
@@ -53,27 +53,29 @@ import javax.annotation.Nullable;
  * is set to {@link Stage#BEFORE_HISTORY}, then you can drop (or log) changes
  * before the change has reached the history, reordering, and actual change
  * extents, <em>but</em> that means that any changes made with
- * {@link EditSession#rawSetBlock(Vector, BlockStateHolder)} will skip your
+ * {@link EditSession#rawSetBlock(Vector, BaseBlock)} will skip your
  * custom {@link Extent} because that method bypasses history (and reorder).
  * It is thus recommended that loggers intercept at {@link Stage#BEFORE_CHANGE}
  * and block interceptors intercept at BOTH {@link Stage#BEFORE_CHANGE} and
  * {@link Stage#BEFORE_HISTORY}.</p>
  */
-public class EditSessionEvent extends Event {
+public class EditSessionEvent extends Event implements Cancellable {
 
     private final World world;
     private final Actor actor;
     private final int maxBlocks;
     private final Stage stage;
     private Extent extent;
+    private EditSession session;
+    private boolean cancelled;
 
     /**
      * Create a new event.
      *
-     * @param world the world
-     * @param actor the actor, or null if there is no actor specified
+     * @param world     the world
+     * @param actor     the actor, or null if there is no actor specified
      * @param maxBlocks the maximum number of block changes
-     * @param stage the stage
+     * @param stage     the stage
      */
     public EditSessionEvent(@Nullable World world, Actor actor, int maxBlocks, Stage stage) {
         this.world = world;
@@ -82,12 +84,22 @@ public class EditSessionEvent extends Event {
         this.stage = stage;
     }
 
+    public void setEditSession(EditSession session) {
+        this.session = session;
+    }
+
+    public EditSession getEditSession() {
+        return session;
+    }
+
     /**
      * Get the actor for this event.
      *
      * @return the actor, which may be null if unavailable
      */
-    public @Nullable Actor getActor() {
+    public
+    @Nullable
+    Actor getActor() {
         return actor;
     }
 
@@ -96,7 +108,9 @@ public class EditSessionEvent extends Event {
      *
      * @return the world
      */
-    public @Nullable World getWorld() {
+    public
+    @Nullable
+    World getWorld() {
         return world;
     }
 
@@ -138,6 +152,16 @@ public class EditSessionEvent extends Event {
         this.extent = extent;
     }
 
+    @Override
+    public boolean isCancelled() {
+        return cancelled;
+    }
+
+    @Override
+    public void setCancelled(boolean cancelled) {
+        this.cancelled = cancelled;
+    }
+
     /**
      * Create a clone of this event with the given stage.
      *
@@ -145,7 +169,10 @@ public class EditSessionEvent extends Event {
      * @return a new event
      */
     public EditSessionEvent clone(Stage stage) {
-        return new EditSessionEvent(world, actor, maxBlocks, stage);
+        EditSessionEvent clone = new EditSessionEvent(world, actor, maxBlocks, stage);
+        clone.setEditSession(session);
+        return clone;
     }
+
 
 }

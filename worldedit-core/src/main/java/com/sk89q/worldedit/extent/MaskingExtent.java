@@ -32,12 +32,13 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 public class MaskingExtent extends AbstractDelegateExtent {
 
     private Mask mask;
+    private MutableBlockVector mutable = new MutableBlockVector();
 
     /**
      * Create a new instance.
      *
      * @param extent the extent
-     * @param mask the mask
+     * @param mask   the mask
      */
     public MaskingExtent(Extent extent, Mask mask) {
         super(extent);
@@ -68,5 +69,17 @@ public class MaskingExtent extends AbstractDelegateExtent {
     public boolean setBlock(Vector location, BlockStateHolder block) throws WorldEditException {
         return mask.test(location) && super.setBlock(location, block);
     }
+
+    @Override
+    public boolean setBiome(Vector2D position, BaseBiome biome) {
+        return mask.test(mutable.setComponents(position.getBlockX(), 0, position.getBlockZ())) && super.setBiome(position, biome);
+    }
+
+    @Override
+    public boolean setBiome(int x, int y, int z, BaseBiome biome) {
+        return mask.test(mutable.setComponents(x, y, z)) && super.setBiome(x, y, z, biome);
+    }
+
+
 
 }

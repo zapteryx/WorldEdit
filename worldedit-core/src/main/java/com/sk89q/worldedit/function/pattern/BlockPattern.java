@@ -26,19 +26,20 @@ import com.sk89q.worldedit.world.block.BaseBlock;
 import com.sk89q.worldedit.world.block.BlockStateHolder;
 
 /**
- * A pattern that returns the same {@link BaseBlock} each time.
+ * @deprecated Just use BaseBlock directly
  */
-public class BlockPattern extends AbstractPattern {
+@Deprecated
+public class BlockPattern implements Pattern {
 
     private BlockStateHolder block;
 
-    /**
-     * Create a new pattern with the given block.
-     *
-     * @param block the block
-     */
     public BlockPattern(BlockStateHolder block) {
-        setBlock(block);
+        this.block = block;
+    }
+
+    @Override
+    public BlockStateHolder apply(Vector position) {
+        return block;
     }
 
     /**
@@ -60,9 +61,7 @@ public class BlockPattern extends AbstractPattern {
         this.block = block;
     }
 
-    @Override
-    public BlockStateHolder apply(Vector position) {
-        return block;
+    public static Class<BlockPattern> inject() {
+        return BlockPattern.class;
     }
-
 }

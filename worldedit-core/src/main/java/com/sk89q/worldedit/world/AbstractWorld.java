@@ -62,9 +62,7 @@ public abstract class AbstractWorld implements World {
 
     @Override
     public Mask createLiquidMask() {
-        return new BlockMask(this,
-                BlockTypes.LAVA.getDefaultState().toFuzzy(),
-                BlockTypes.WATER.getDefaultState().toFuzzy());
+        return new BlockTypeMask(this, BlockTypes.LAVA, BlockTypes.WATER);
     }
 
     @Override
@@ -89,6 +87,11 @@ public abstract class AbstractWorld implements World {
     @Override
     public boolean playEffect(Vector position, int type, int data) {
         return false;
+    }
+
+    @Override
+    public BlockState getLazyBlock(Vector position) {
+        return new BaseBlock(getBlock(position));
     }
 
     @Override
@@ -140,7 +143,7 @@ public abstract class AbstractWorld implements World {
         }
 
         public void play() {
-            playEffect(position, 2001, blockType.getLegacyId());
+            playEffect(position, 2001, blockType.getLegacyCombinedId() >> 4);
         }
 
         @Override
@@ -148,5 +151,4 @@ public abstract class AbstractWorld implements World {
             return Double.compare(priority, other != null ? other.priority : 0);
         }
     }
-
 }

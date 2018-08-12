@@ -53,10 +53,13 @@ public class MaskUnion extends MaskIntersection {
     }
 
     @Override
-    public boolean test(Vector vector) {
-        Collection<Mask> masks = getMasks();
+    public Function<Map.Entry<Mask, Mask>, Mask> pairingFunction() {
+        return input -> input.getKey().or(input.getValue());
+    }
 
-        for (Mask mask : masks) {
+    @Override
+    public boolean test(Vector vector) {
+        for (Mask mask : getMasksArray()) {
             if (mask.test(vector)) {
                 return true;
             }
@@ -68,7 +71,7 @@ public class MaskUnion extends MaskIntersection {
     @Nullable
     @Override
     public Mask2D toMask2D() {
-        List<Mask2D> mask2dList = new ArrayList<>();
+        List<Mask2D> mask2dList = new ArrayList<Mask2D>();
         for (Mask mask : getMasks()) {
             Mask2D mask2d = mask.toMask2D();
             if (mask2d != null) {
@@ -78,5 +81,9 @@ public class MaskUnion extends MaskIntersection {
             }
         }
         return new MaskUnion2D(mask2dList);
+    }
+
+    public static Class<MaskUnion> inject() {
+        return MaskUnion.class;
     }
 }

@@ -179,8 +179,8 @@ public class TreeGenerator {
         int trunkHeight = (int) Math.floor(Math.random() * 2) + 3;
         int height = (int) Math.floor(Math.random() * 5) + 8;
 
-        BlockState logBlock = BlockTypes.OAK_LOG.getDefaultState();
-        BlockState leavesBlock = BlockTypes.OAK_LEAVES.getDefaultState();
+        BlockStateHolder logBlock = BlockTypes.OAK_LOG.getDefaultState();
+        BlockStateHolder leavesBlock = BlockTypes.OAK_LEAVES.getDefaultState();
 
         // Create trunk
         for (int i = 0; i < trunkHeight; ++i) {

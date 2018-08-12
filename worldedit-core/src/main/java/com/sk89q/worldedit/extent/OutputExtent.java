@@ -35,8 +35,8 @@ public interface OutputExtent {
 
     /**
      * Change the block at the given location to the given block. The operation may
-     * not tie the given {@link BlockStateHolder} to the world, so future changes to the
-     * {@link BlockStateHolder} do not affect the world until this method is called again.
+     * not tie the given {@link BlockState} to the world, so future changes to the
+     * {@link BlockState} do not affect the world until this method is called again.
      *
      * <p>The return value of this method indicates whether the change was probably
      * successful. It may not be successful if, for example, the location is out

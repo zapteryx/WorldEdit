@@ -31,7 +31,9 @@ import com.sk89q.worldedit.world.block.BlockStateHolder;
 public class ClipboardPattern extends AbstractPattern {
 
     private final Clipboard clipboard;
-    private final Vector size;
+    private final int sx, sy, sz;
+    private final Vector min;
+    private MutableBlockVector mutable = new MutableBlockVector();
 
     /**
      * Create a new clipboard pattern.
@@ -41,16 +43,26 @@ public class ClipboardPattern extends AbstractPattern {
     public ClipboardPattern(Clipboard clipboard) {
         checkNotNull(clipboard);
         this.clipboard = clipboard;
-        this.size = clipboard.getMaximumPoint().subtract(clipboard.getMinimumPoint()).add(1, 1, 1);
+        Vector size = clipboard.getMaximumPoint().subtract(clipboard.getMinimumPoint()).add(1, 1, 1);
+        this.sx = size.getBlockX();
+        this.sy = size.getBlockY();
+        this.sz = size.getBlockZ();
+        this.min = clipboard.getMinimumPoint();
     }
 
     @Override
     public BlockStateHolder apply(Vector position) {
-        int xp = Math.abs(position.getBlockX()) % size.getBlockX();
-        int yp = Math.abs(position.getBlockY()) % size.getBlockY();
-        int zp = Math.abs(position.getBlockZ()) % size.getBlockZ();
-
-        return clipboard.getFullBlock(clipboard.getMinimumPoint().add(new Vector(xp, yp, zp)));
+        int xp = position.getBlockX() % sx;
+        int yp = position.getBlockY() % sy;
+        int zp = position.getBlockZ() % sz;
+        if (xp < 0) xp += sx;
+        if (yp < 0) yp += sy;
+        if (zp < 0) zp += sz;
+        mutable.mutX((min.getX() + xp));
+        mutable.mutY((min.getY() + yp));
+        mutable.mutZ((min.getZ() + zp));
+        return clipboard.getBlock(mutable);
     }
+
 
 }

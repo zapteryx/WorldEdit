@@ -144,22 +144,14 @@ public class EllipsoidRegionSelector implements RegionSelector, CUIRegion {
 
     @Override
     public void explainPrimarySelection(Actor player, LocalSession session, Vector pos) {
-        if (isDefined()) {
-            player.print("Center position set to " + region.getCenter() + " (" + region.getArea() + ").");
-        } else {
-            player.print("Center position set to " + region.getCenter() + ".");
-        }
+        BBC.SELECTOR_CENTER.send(player, region.getCenter(), region.getArea());
 
         session.describeCUI(player);
     }
 
     @Override
     public void explainSecondarySelection(Actor player, LocalSession session, Vector pos) {
-        if (isDefined()) {
-            player.print("Radius set to " + region.getRadius() + " (" + region.getArea() + ").");
-        } else {
-            player.print("Radius set to " + region.getRadius() + ".");
-        }
+        BBC.SELECTOR_RADIUS.send(player, region.getRadius(), region.getArea());
 
         session.describeCUI(player);
     }
@@ -205,7 +197,7 @@ public class EllipsoidRegionSelector implements RegionSelector, CUIRegion {
 
     @Override
     public List<String> getInformationLines() {
-        final List<String> lines = new ArrayList<>();
+        final List<String> lines = new ArrayList<String>();
 
         final Vector center = region.getCenter();
         if (center.lengthSq() > 0) {
@@ -256,5 +248,6 @@ public class EllipsoidRegionSelector implements RegionSelector, CUIRegion {
     public BlockVector getPrimaryPosition() throws IncompleteRegionException {
         return region.getCenter().toBlockVector();
     }
+
 
 }

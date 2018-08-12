@@ -143,11 +143,10 @@ public class EntityRemover {
             EntityProperties registryType = entity.getFacet(EntityProperties.class);
             if (registryType != null) {
                 if (type.matches(registryType)) {
-                    entity.remove();
+                    TaskManager.IMP.sync(entity::remove);
                     return true;
                 }
             }
-
             return false;
         };
     }

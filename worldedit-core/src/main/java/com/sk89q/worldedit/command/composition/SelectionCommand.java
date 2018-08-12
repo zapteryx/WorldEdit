@@ -61,34 +61,92 @@ public class SelectionCommand extends SimpleCommand<Operation> {
         if (!testPermission(locals)) {
             throw new CommandPermissionsException();
         }
-
         Contextual<? extends Operation> operationFactory = delegate.call(args, locals);
-
         Actor actor = locals.get(Actor.class);
         if (actor instanceof Player) {
             try {
                 Player player = (Player) actor;
                 LocalSession session = WorldEdit.getInstance().getSessionManager().get(player);
                 Region selection = session.getSelection(player.getWorld());
-
                 EditSession editSession = session.createEditSession(player);
                 editSession.enableQueue();
                 locals.put(EditSession.class, editSession);
                 session.tellVersion(player);
-
                 EditContext editContext = new EditContext();
                 editContext.setDestination(locals.get(EditSession.class));
                 editContext.setRegion(selection);
-
                 Operation operation = operationFactory.createFromContext(editContext);
+                // Shortcut
+                if (selection instanceof CuboidRegion && editSession.hasFastMode() && operation instanceof RegionVisitor) {
+                    CuboidRegion cuboid = (CuboidRegion) selection;
+                    RegionFunction function = ((RegionVisitor) operation).function;
+                    RegionWrapper current = new RegionWrapper(cuboid.getMinimumPoint(), cuboid.getMaximumPoint());
+                    FawePlayer fp = FawePlayer.wrap(player);
+                    FaweRegionExtent regionExtent = editSession.getRegionExtent();
+
+                    if (function instanceof BlockReplace && regionExtent == null || regionExtent.isGlobal()) {
+                        try {
+                            BlockReplace replace = ((BlockReplace) function);
+                            Field field = replace.getClass().getDeclaredField("pattern");
+                            field.setAccessible(true);
+                            Pattern pattern = (Pattern) field.get(replace);
+                            if (pattern instanceof BlockStateHolder) {
+                                BlockStateHolder block = ((BlockStateHolder) pattern);
+                                final FaweQueue queue = editSession.getQueue();
+                                final int minY = cuboid.getMinimumY();
+                                final int maxY = cuboid.getMaximumY();
+
+                                final FaweChunk<?> fc = queue.getFaweChunk(0, 0);
+                                fc.fillCuboid(0, 15, minY, maxY, 0, 15, block.getInternalId());
+                                fc.optimize();
+
+                                int bcx = (current.minX) >> 4;
+                                int bcz = (current.minZ) >> 4;
+
+                                int tcx = (current.maxX) >> 4;
+                                int tcz = (current.maxZ) >> 4;
+                                // [chunkx, chunkz, pos1x, pos1z, pos2x, pos2z, isedge]
+                                MainUtil.chunkTaskSync(current, new RunnableVal<int[]>() {
+                                    @Override
+                                    public void run(int[] value) {
+                                        FaweChunk newChunk;
+                                        if (value[6] == 0) {
+                                            newChunk = fc.copy(true);
+                                            newChunk.setLoc(queue, value[0], value[1]);
+                                        } else {
+                                            int bx = value[2] & 15;
+                                            int tx = value[4] & 15;
+                                            int bz = value[3] & 15;
+                                            int tz = value[5] & 15;
+                                            if (bx == 0 && tx == 15 && bz == 0 && tz == 15) {
+                                                newChunk = fc.copy(true);
+                                                newChunk.setLoc(queue, value[0], value[1]);
+                                            } else {
+                                                newChunk = queue.getFaweChunk(value[0], value[1]);
+                                                newChunk.fillCuboid(value[2] & 15, value[4] & 15, minY, maxY, value[3] & 15, value[5] & 15, block.getInternalId());
+                                            }
+                                        }
+                                        newChunk.addToQueue();
+                                    }
+                                });
+                                queue.enqueue();
+                                BBC.OPERATION.send(actor, BBC.VISITOR_BLOCK.format(cuboid.getArea()));
+                                queue.flush();
+                                return null;
+                            }
+                        } catch (Throwable e) {
+                            MainUtil.handleError(e);
+                        }
+                    }
+                }
                 Operations.completeBlindly(operation);
 
                 List<String> messages = Lists.newArrayList();
                 operation.addStatusMessages(messages);
                 if (messages.isEmpty()) {
-                    actor.print("Operation completed.");
+                    BBC.OPERATION.send(actor, 0);
                 } else {
-                    actor.print("Operation completed (" + Joiner.on(", ").join(messages) + ").");
+                    BBC.OPERATION.send(actor, Joiner.on(", ").join(messages));
                 }
 
                 return operation;
@@ -107,8 +165,10 @@ public class SelectionCommand extends SimpleCommand<Operation> {
     }
 
     @Override
-    protected boolean testPermission0(CommandLocals locals) {
+    public boolean testPermission0(CommandLocals locals) {
         return locals.get(Actor.class).hasPermission(permission);
     }
+
+
 
 }

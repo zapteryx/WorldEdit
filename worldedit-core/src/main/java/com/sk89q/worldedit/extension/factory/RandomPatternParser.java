@@ -61,7 +61,7 @@ class RandomPatternParser extends InputParser<Pattern> {
                 block = blockRegistry.parseFromInput(token, context);
             }
 
-            randomPattern.add(new BlockPattern(block), chance);
+            randomPattern.add(block, chance);
         }
 
         return randomPattern;

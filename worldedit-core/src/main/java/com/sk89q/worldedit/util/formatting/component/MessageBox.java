@@ -37,38 +37,19 @@ public class MessageBox extends StyledFragment {
      */
     public MessageBox(String title) {
         checkNotNull(title);
-
-        int leftOver = ColorCodeBuilder.GUARANTEED_NO_WRAP_CHAT_PAGE_WIDTH - title.length() - 2;
-        int leftSide = (int) Math.floor(leftOver * 1.0/3);
-        int rightSide = (int) Math.floor(leftOver * 2.0/3);
-        if (leftSide > 0) {
-            createFragment(Style.YELLOW).append(createBorder(leftSide));
-        }
-        append(" ");
         append(title);
-        append(" ");
-        if (rightSide > 0) {
-            createFragment(Style.YELLOW).append(createBorder(rightSide));
-        }
         newLine();
         append(contents);
     }
 
-    private String createBorder(int count) {
-        StringBuilder builder = new StringBuilder();
-        for (int i = 0; i < count; i++) {
-            builder.append("-");
-        }
-        return builder.toString();
-    }
-
     /**
      * Get the internal contents.
-     * 
+     *
      * @return the contents
      */
     public StyledFragment getContents() {
         return contents;
     }
+
 
 }

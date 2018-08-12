@@ -38,7 +38,11 @@ public class BukkitBlockRegistry extends BundledBlockRegistry {
     @Nullable
     @Override
     public BlockMaterial getMaterial(BlockType blockType) {
-        return materialMap.computeIfAbsent(BukkitAdapter.adapt(blockType),
+        Material type = BukkitAdapter.adapt(blockType);
+        if (type == null) {
+            type = Material.AIR;
+        }
+        return materialMap.computeIfAbsent(type,
                 material -> new BukkitBlockMaterial(BukkitBlockRegistry.super.getMaterial(blockType), material));
     }
 
@@ -74,5 +78,17 @@ public class BukkitBlockRegistry extends BundledBlockRegistry {
         public boolean isTranslucent() {
             return material.isTransparent();
         }
+    }
+
+    @Override
+    public Collection<String> registerBlocks() {
+        ArrayList<String> blocks = new ArrayList<>();
+        for (Material m : Material.values()) {
+            if (!m.isLegacy() && m.isBlock()) {
+                BlockData blockData = m.createBlockData();
+                blocks.add(blockData.getAsString());
+            }
+        }
+        return blocks;
     }
 }

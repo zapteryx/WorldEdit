@@ -66,7 +66,7 @@ public class FloatingTreeRemover implements BlockTool {
 
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config,
-            Player player, LocalSession session, Location clicked) {
+                              Player player, LocalSession session, Location clicked) {
 
         final World world = (World) clicked.getExtent();
         final BlockState state = world.getBlock(clicked.toVector());

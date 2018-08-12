@@ -40,7 +40,6 @@ import java.util.Set;
  * an initial block and of the same type.
  */
 public class RecursivePickaxe implements BlockTool {
-
     private double range;
 
     public RecursivePickaxe(double range) {
@@ -55,63 +54,33 @@ public class RecursivePickaxe implements BlockTool {
     @Override
     public boolean actPrimary(Platform server, LocalConfiguration config, Player player, LocalSession session, com.sk89q.worldedit.util.Location clicked) {
         World world = (World) clicked.getExtent();
-
-        BlockType initialType = world.getBlock(clicked.toVector()).getBlockType();
-
-        if (initialType == BlockTypes.AIR) {
-            return true;
-        }
-
-        if (initialType == BlockTypes.BEDROCK && !player.canDestroyBedrock()) {
-            return true;
-        }
+        final Vector pos = clicked.toVector();
 
         EditSession editSession = session.createEditSession(player);
+
+        BlockStateHolder block = editSession.getBlock(pos);
+        if (block.getBlockType().getMaterial().isAir()) {
+            return true;
+        }
+
+        if (block.getBlockType() == BlockTypes.BEDROCK && !player.canDestroyBedrock()) {
+            return true;
+        }
+
         editSession.getSurvivalExtent().setToolUse(config.superPickaxeManyDrop);
 
-        try {
-            recurse(server, editSession, world, clicked.toVector().toBlockVector(),
-                    clicked.toVector(), range, initialType, new HashSet<>());
-        } catch (MaxChangedBlocksException e) {
-            player.printError("Max blocks change limit reached.");
-        } finally {
-            editSession.flushQueue();
-            session.remember(editSession);
-        }
+        final int radius = (int) range;
+        final BlockReplace replace = new BlockReplace(editSession, (editSession.nullBlock));
+        editSession.setMask((Mask) null);
+        RecursiveVisitor visitor = new RecursiveVisitor(new IdMask(editSession), replace, radius, editSession);
+        visitor.visit(pos);
+        Operations.completeBlindly(visitor);
+
+        editSession.flushQueue();
+        session.remember(editSession);
 
         return true;
     }
 
-    private static void recurse(Platform server, EditSession editSession, World world, BlockVector pos,
-            Vector origin, double size, BlockType initialType, Set<BlockVector> visited) throws MaxChangedBlocksException {
-
-        final double distanceSq = origin.distanceSq(pos);
-        if (distanceSq > size*size || visited.contains(pos)) {
-            return;
-        }
-
-        visited.add(pos);
-
-        if (editSession.getBlock(pos).getBlockType() != initialType) {
-            return;
-        }
-
-        world.queueBlockBreakEffect(server, pos, initialType, distanceSq);
-
-        editSession.setBlock(pos, BlockTypes.AIR.getDefaultState());
-
-        recurse(server, editSession, world, pos.add(1, 0, 0).toBlockVector(),
-                origin, size, initialType, visited);
-        recurse(server, editSession, world, pos.add(-1, 0, 0).toBlockVector(),
-                origin, size, initialType, visited);
-        recurse(server, editSession, world, pos.add(0, 0, 1).toBlockVector(),
-                origin, size, initialType, visited);
-        recurse(server, editSession, world, pos.add(0, 0, -1).toBlockVector(),
-                origin, size, initialType, visited);
-        recurse(server, editSession, world, pos.add(0, 1, 0).toBlockVector(),
-                origin, size, initialType, visited);
-        recurse(server, editSession, world, pos.add(0, -1, 0).toBlockVector(),
-                origin, size, initialType, visited);
-    }
 
 }

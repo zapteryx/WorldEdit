@@ -91,7 +91,7 @@ public class BukkitWorld extends AbstractWorld {
         List<com.sk89q.worldedit.entity.Entity> entities = new ArrayList<>();
         for (Entity ent : ents) {
             if (region.contains(BukkitAdapter.asVector(ent.getLocation()))) {
-                entities.add(BukkitAdapter.adapt(ent));
+                addEntities(ent, entities);
             }
         }
         return entities;
@@ -101,9 +101,41 @@ public class BukkitWorld extends AbstractWorld {
     public List<com.sk89q.worldedit.entity.Entity> getEntities() {
         List<com.sk89q.worldedit.entity.Entity> list = new ArrayList<>();
         for (Entity entity : getWorld().getEntities()) {
-            list.add(BukkitAdapter.adapt(entity));
+            addEntities(entity, list);
         }
         return list;
+    }
+
+    private static com.sk89q.worldedit.entity.Entity adapt(Entity ent) {
+        if (ent == null) return null;
+        return BukkitAdapter.adapt(ent);
+    }
+
+    private void addEntities(Entity ent, Collection<com.sk89q.worldedit.entity.Entity> ents) {
+        ents.add(BukkitAdapter.adapt(ent));
+        if (ent instanceof Player) {
+            final Player plr = (Player) ent;
+            com.sk89q.worldedit.entity.Entity left = adapt(((Player) ent).getShoulderEntityLeft());
+            com.sk89q.worldedit.entity.Entity right = adapt(((Player) ent).getShoulderEntityRight());
+            if (left != null) {
+                ents.add(new DelegateEntity(left) {
+                    @Override
+                    public boolean remove() {
+                        plr.setShoulderEntityLeft(null);
+                        return true;
+                    }
+                });
+            }
+            if (right != null) {
+                ents.add(new DelegateEntity(right) {
+                    @Override
+                    public boolean remove() {
+                        plr.setShoulderEntityRight(null);
+                        return true;
+                    }
+                });
+            }
+        }
     }
 
     @Nullable
@@ -165,7 +197,7 @@ public class BukkitWorld extends AbstractWorld {
 
     @Override
     public boolean regenerate(Region region, EditSession editSession) {
-        BlockStateHolder[] history = new BlockStateHolder[16 * 16 * (getMaxY() + 1)];
+        com.sk89q.worldedit.world.block.BlockStateHolder[] history = new com.sk89q.worldedit.world.block.BlockState[16 * 16 * (getMaxY() + 1)];
 
         for (Vector2D chunk : region.getChunks()) {
             Vector min = new Vector(chunk.getBlockX() * 16, 0, chunk.getBlockZ() * 16);
@@ -415,15 +447,15 @@ public class BukkitWorld extends AbstractWorld {
     }
 
     @Override
-    public boolean setBlock(Vector position, BlockStateHolder block, boolean notifyAndLight) throws WorldEditException {
+    public boolean setBlock(Vector position, BlockStateHolder block, boolean notifyAndLight) {
         BukkitImplAdapter adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
         if (adapter != null) {
             try {
                 return adapter.setBlock(BukkitAdapter.adapt(getWorld(), position), block, notifyAndLight);
             } catch (Exception e) {
-                if (block instanceof BaseBlock && ((BaseBlock) block).getNbtData() != null) {
+                if (block.getNbtData() != null) {
                     logger.warning("Tried to set a corrupt tile entity at " + position.toString());
-                    logger.warning(((BaseBlock) block).getNbtData().toString());
+                    logger.warning(block.getNbtData().toString());
                 }
                 e.printStackTrace();
                 Block bukkitBlock = getWorld().getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
@@ -432,18 +464,23 @@ public class BukkitWorld extends AbstractWorld {
             }
         } else {
             Block bukkitBlock = getWorld().getBlockAt(position.getBlockX(), position.getBlockY(), position.getBlockZ());
-            bukkitBlock.setBlockData(BukkitAdapter.adapt(block), notifyAndLight);
+            bukkitBlock.setBlockData(BukkitAdapter.adapt(block), false);
             return true;
         }
     }
 
     @Override
-    public BaseBlock getFullBlock(Vector position) {
+    public com.sk89q.worldedit.world.block.BlockState getLazyBlock(Vector position) {
+        return getBlock(position);
+    }
+
+    @Override
+    public com.sk89q.worldedit.world.block.BlockState getFullBlock(Vector position) {
         BukkitImplAdapter adapter = WorldEditPlugin.getInstance().getBukkitImplAdapter();
         if (adapter != null) {
             return adapter.getBlock(BukkitAdapter.adapt(getWorld(), position));
         } else {
-            return getBlock(position).toBaseBlock();
+            return getBlock(position);
         }
     }
 

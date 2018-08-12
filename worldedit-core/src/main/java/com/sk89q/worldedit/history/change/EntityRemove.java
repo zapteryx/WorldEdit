@@ -32,8 +32,8 @@ import com.sk89q.worldedit.util.Location;
  */
 public class EntityRemove implements Change {
 
-    private final Location location;
-    private final BaseEntity state;
+    public final Location location;
+    public final BaseEntity state;
     private Entity entity;
 
     /**
@@ -47,6 +47,10 @@ public class EntityRemove implements Change {
         checkNotNull(state);
         this.location = location;
         this.state = state;
+    }
+
+    public Entity getEntity() {
+        return entity;
     }
 
     @Override

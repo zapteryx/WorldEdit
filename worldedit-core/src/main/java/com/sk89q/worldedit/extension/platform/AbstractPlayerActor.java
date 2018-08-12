@@ -102,7 +102,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
 
         byte free = 0;
 
-        while (y <= world.getMaximumPoint().getBlockY() + 2) {
+        while (y <= world.getMinimumPoint().getBlockY() + 2) {
             if (!world.getBlock(new Vector(x, y, z)).getBlockType().getMaterial().isMovementBlocker()) {
                 ++free;
             } else {
@@ -111,7 +111,9 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
 
             if (free == 2) {
                 if (y - 1 != origY) {
-                    setPosition(new Vector(x + 0.5, y - 2 + 1, z + 0.5));
+                    final Vector pos = new Vector(x, y - 2, z);
+                    final BlockStateHolder state = world.getBlock(pos);
+                    setPosition(new Vector(x + 0.5, y - 2 + BlockType.centralTopLimit(state), z + 0.5));
                 }
 
                 return;
@@ -130,9 +132,9 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
 
         while (y >= 0) {
             final Vector pos = new Vector(x, y, z);
-            final BlockState id = world.getBlock(pos);
+            final BlockStateHolder id = world.getBlock(pos);
             if (id.getBlockType().getMaterial().isMovementBlocker()) {
-                setPosition(new Vector(x + 0.5, y + 1, z + 0.5));
+                setPosition(new Vector(x + 0.5, y + BlockType.centralTopLimit(id), z + 0.5));
                 return;
             }
 
@@ -175,7 +177,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
                         return false;
                     }
 
-                    setPosition(platform.add(0.5, 1, 0.5));
+                    setPosition(platform.add(0.5, BlockType.centralTopLimit(block), 0.5));
                     return true;
                 }
             }
@@ -215,7 +217,7 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
                     // Don't want to end up in lava
                     if (type != BlockTypes.AIR && type != BlockTypes.LAVA) {
                         // Found a block!
-                        setPosition(platform.add(0.5, 1, 0.5));
+                        setPosition(platform.add(0.5, BlockType.centralTopLimit(block), 0.5));
                         return true;
                     }
 
@@ -297,25 +299,25 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
 
     @Override
     public void floatAt(int x, int y, int z, boolean alwaysGlass) {
-        try {
-            Vector spot = new Vector(x, y - 1, z);
-            if (!getLocation().getExtent().getBlock(spot).getBlockType().getMaterial().isMovementBlocker()) {
-                getLocation().getExtent().setBlock(spot, BlockTypes.GLASS.getDefaultState());
+        Vector spot = new Vector(x, y - 1, z);
+        if (!getLocation().getExtent().getBlock(spot).getBlockType().getMaterial().isMovementBlocker()) {
+            try {
+                getLocation().getExtent().setBlock(new Vector(x, y - 1, z), BlockTypes.GLASS.getDefaultState());
+            } catch (WorldEditException e) {
+                e.printStackTrace();
             }
-        } catch (WorldEditException e) {
-            e.printStackTrace();
         }
         setPosition(new Vector(x + 0.5, y, z + 0.5));
     }
 
     @Override
     public Location getBlockIn() {
-        return getLocation().setPosition(getLocation().toVector().toBlockVector());
+        return getLocation();
     }
 
     @Override
     public Location getBlockOn() {
-        return getLocation().setPosition(getLocation().setY(getLocation().getY() - 1).toVector().toBlockVector());
+        return getLocation().setY(getLocation().getY() - 1);
     }
 
     @Override
@@ -364,12 +366,12 @@ public abstract class AbstractPlayerActor implements Actor, Player, Cloneable {
     }
 
     @Override
-    public BaseBlock getBlockInHand(HandSide handSide) throws WorldEditException {
+    public BlockState getBlockInHand(HandSide handSide) throws WorldEditException {
         final ItemType typeId = getItemInHand(handSide).getType();
         if (typeId.hasBlockType()) {
-            return typeId.getBlockType().getDefaultState().toBaseBlock();
+            return typeId.getBlockType().getDefaultState();
         } else {
-            return BlockTypes.AIR.getDefaultState().toBaseBlock();
+            return BlockTypes.AIR.getDefaultState();
         }
     }
 

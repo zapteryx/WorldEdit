@@ -32,8 +32,8 @@ import com.sk89q.worldedit.util.Location;
  */
 public class EntityCreate implements Change {
 
-    private final Location location;
-    private final BaseEntity state;
+    public final Location location;
+    public final BaseEntity state;
     private Entity entity;
 
     /**
@@ -58,6 +58,10 @@ public class EntityCreate implements Change {
             entity.remove();
             entity = null;
         }
+    }
+
+    public Entity getEntity() {
+        return entity;
     }
 
     @Override

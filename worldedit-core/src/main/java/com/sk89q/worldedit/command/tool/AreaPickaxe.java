@@ -54,7 +54,7 @@ public class AreaPickaxe implements BlockTool {
         int oz = clicked.getBlockZ();
         BlockType initialType = clicked.getExtent().getBlock(clicked.toVector()).getBlockType();
 
-        if (initialType == BlockTypes.AIR) {
+        if (initialType.getMaterial().isAir()) {
             return true;
         }
 
@@ -65,29 +65,21 @@ public class AreaPickaxe implements BlockTool {
         EditSession editSession = session.createEditSession(player);
         editSession.getSurvivalExtent().setToolUse(config.superPickaxeManyDrop);
 
-        try {
-            for (int x = ox - range; x <= ox + range; ++x) {
-                for (int y = oy - range; y <= oy + range; ++y) {
-                    for (int z = oz - range; z <= oz + range; ++z) {
-                        Vector pos = new Vector(x, y, z);
-                        if (editSession.getBlock(pos).getBlockType() != initialType) {
-                            continue;
-                        }
-
-                        ((World) clicked.getExtent()).queueBlockBreakEffect(server, pos, initialType, clicked.toVector().distanceSq(pos));
-
-                        editSession.setBlock(pos, BlockTypes.AIR.getDefaultState());
+        for (int x = ox - range; x <= ox + range; ++x) {
+            for (int z = oz - range; z <= oz + range; ++z) {
+                for (int y = oy + range; y >= oy - range; --y) {
+                    if (initialType.equals(editSession.getLazyBlock(x, y, z))) {
+                        continue;
                     }
+                    editSession.setBlock(x, y, z, BlockTypes.AIR.getDefaultState());
                 }
             }
-        } catch (MaxChangedBlocksException e) {
-            player.printError("Max blocks change limit reached.");
-        } finally {
-            editSession.flushQueue();
-            session.remember(editSession);
         }
+        editSession.flushQueue();
+        session.remember(editSession);
 
         return true;
     }
+
 
 }

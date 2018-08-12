@@ -33,56 +33,55 @@ import java.util.Random;
  */
 public class RandomPattern extends AbstractPattern {
 
-    private final Random random = new Random();
-    private List<Chance> patterns = new ArrayList<>();
-    private double max = 0;
+    private final SimpleRandom random;
+    private Map<Pattern, Double> weights = new HashMap<>();
+    private RandomCollection<Pattern> collection;
+    private LinkedHashSet<Pattern> patterns = new LinkedHashSet<>();
+
+    public RandomPattern() {
+        this(new TrueRandom());
+    }
+
+    public RandomPattern(SimpleRandom random) {
+        this.random = random;
+    }
 
     /**
      * Add a pattern to the weight list of patterns.
-     *
+     * <p>
      * <p>The probability for the pattern added is chance / max where max is
      * the sum of the probabilities of all added patterns.</p>
      *
      * @param pattern the pattern
-     * @param chance the chance, which can be any positive number
+     * @param chance  the chance, which can be any positive number
      */
     public void add(Pattern pattern, double chance) {
         checkNotNull(pattern);
-        patterns.add(new Chance(pattern, chance));
-        max += chance;
+        Double existingWeight = weights.get(pattern);
+        if (existingWeight != null) chance += existingWeight;
+        weights.put(pattern, chance);
+        collection = RandomCollection.of(weights, random);
+        this.patterns.add(pattern);
+    }
+
+    public Set<Pattern> getPatterns() {
+        return patterns;
+    }
+
+    public RandomCollection<Pattern> getCollection() {
+        return collection;
     }
 
     @Override
-    public BlockStateHolder apply(Vector position) {
-        double r = random.nextDouble();
-        double offset = 0;
-
-        for (Chance chance : patterns) {
-            if (r <= (offset + chance.getChance()) / max) {
-                return chance.getPattern().apply(position);
-            }
-            offset += chance.getChance();
-        }
-
-        throw new RuntimeException("ProportionalFillPattern");
+    public BlockStateHolder apply(Vector get) {
+        return collection.next(get.getBlockX(), get.getBlockY(), get.getBlockZ()).apply(get);
     }
 
-    private static class Chance {
-        private Pattern pattern;
-        private double chance;
-
-        private Chance(Pattern pattern, double chance) {
-            this.pattern = pattern;
-            this.chance = chance;
-        }
-
-        public Pattern getPattern() {
-            return pattern;
-        }
-
-        public double getChance() {
-            return chance;
-        }
+    @Override
+    public boolean apply(Extent extent, Vector set, Vector get) throws WorldEditException {
+        return collection.next(get.getBlockX(), get.getBlockY(), get.getBlockZ()).apply(extent, set, get);
     }
+
+
 
 }

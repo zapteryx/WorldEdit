@@ -37,4 +37,9 @@ public class BundledItemRegistry implements ItemRegistry {
         ItemType itemType = ItemTypes.get(id);
         return itemType == null ? null : new BaseItem(itemType);
     }
+
+    @Override
+    public Collection<String> registerItems() {
+        return Collections.emptyList();
+    }
 }

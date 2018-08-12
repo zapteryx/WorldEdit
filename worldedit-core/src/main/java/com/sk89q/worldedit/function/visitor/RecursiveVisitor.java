@@ -33,20 +33,30 @@ public class RecursiveVisitor extends BreadthFirstSearch {
 
     private final Mask mask;
 
+    public RecursiveVisitor(final Mask mask, final RegionFunction function) {
+        this(mask, function, Integer.MAX_VALUE);
+    }
+
     /**
      * Create a new recursive visitor.
      *
-     * @param mask the mask
+     * @param mask     the mask
      * @param function the function
      */
-    public RecursiveVisitor(Mask mask, RegionFunction function) {
-        super(function);
+    public RecursiveVisitor(final Mask mask, final RegionFunction function, int maxDepth) {
+        this(mask, function, maxDepth, null);
+    }
+
+    public RecursiveVisitor(final Mask mask, final RegionFunction function, int maxDepth, HasFaweQueue faweQueue) {
+        super(function, maxDepth, faweQueue);
         checkNotNull(mask);
         this.mask = mask;
     }
 
     @Override
-    protected boolean isVisitable(Vector from, Vector to) {
-        return mask.test(to);
+    public boolean isVisitable(final Vector from, final Vector to) {
+        return this.mask.test(to);
     }
+
+
 }

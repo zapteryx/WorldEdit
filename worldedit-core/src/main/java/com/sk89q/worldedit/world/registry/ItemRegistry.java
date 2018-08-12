@@ -34,4 +34,11 @@ public interface ItemRegistry {
     @Nullable
     BaseItem createFromId(String id);
 
+    /**
+     * Register all items
+     */
+    default Collection<String> registerItems() {
+        return Collections.emptyList();
+    }
+
 }

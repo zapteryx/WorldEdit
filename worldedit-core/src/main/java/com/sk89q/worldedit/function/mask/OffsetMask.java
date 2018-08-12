@@ -33,11 +33,12 @@ public class OffsetMask extends AbstractMask {
 
     private Mask mask;
     private Vector offset;
+    private MutableBlockVector mutable = new MutableBlockVector();
 
     /**
      * Create a new instance.
      *
-     * @param mask the mask
+     * @param mask   the mask
      * @param offset the offset
      */
     public OffsetMask(Mask mask, Vector offset) {
@@ -87,7 +88,10 @@ public class OffsetMask extends AbstractMask {
 
     @Override
     public boolean test(Vector vector) {
-        return getMask().test(vector.add(offset));
+        mutable.mutX((vector.getX() + offset.getX()));
+        mutable.mutY((vector.getY() + offset.getY()));
+        mutable.mutZ((vector.getZ() + offset.getZ()));
+        return getMask().test(mutable);
     }
 
     @Nullable
@@ -100,5 +104,6 @@ public class OffsetMask extends AbstractMask {
             return null;
         }
     }
+
 
 }

@@ -149,20 +149,20 @@ public class GeneralCommands {
     }
 
     @Command(
-        aliases = { "/searchitem", "/l", "/search", "searchitem" },
-        usage = "<query>",
-        flags = "bi",
-        desc = "Search for an item",
-        help =
-            "Searches for an item.\n" +
-            "Flags:\n" +
-            "  -b only search for blocks\n" +
-            "  -i only search for items",
-        min = 1,
-        max = 1
+            aliases = { "/searchitem", "/l", "/search", "searchitem" },
+            usage = "<query>",
+            flags = "bi",
+            desc = "Search for an item",
+            help =
+                    "Searches for an item.\n" +
+                            "Flags:\n" +
+                            "  -b only search for blocks\n" +
+                            "  -i only search for items",
+            min = 1,
+            max = 1
     )
     public void searchItem(Actor actor, CommandContext args) throws WorldEditException {
-        
+
         String query = args.getString(0).trim().toLowerCase();
         boolean blocksOnly = args.hasFlag('b');
         boolean itemsOnly = args.hasFlag('i');
@@ -190,7 +190,7 @@ public class GeneralCommands {
 
             int found = 0;
 
-            for (ItemType searchType : ItemType.REGISTRY) {
+            for (ItemType searchType : ItemTypes.values) {
                 if (found >= 15) {
                     actor.print("Too many results!");
                     break;

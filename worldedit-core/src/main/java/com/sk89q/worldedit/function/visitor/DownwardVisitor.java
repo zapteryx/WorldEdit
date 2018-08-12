@@ -31,27 +31,29 @@ import java.util.Collection;
  * Visits adjacent points on the same X-Z plane as long as the points
  * pass the given mask, and then executes the provided region
  * function on the entire column.
- *
+ * <p>
  * <p>This is used by {@code //fill}.</p>
  */
 public class DownwardVisitor extends RecursiveVisitor {
 
-    private int baseY;
+    private final int baseY;
 
     /**
      * Create a new visitor.
      *
-     * @param mask the mask
+     * @param mask     the mask
      * @param function the function
-     * @param baseY the base Y
+     * @param baseY    the base Y
      */
     public DownwardVisitor(Mask mask, RegionFunction function, int baseY) {
-        super(mask, function);
+        this(mask, function, baseY, Integer.MAX_VALUE, null);
+    }
+
+    public DownwardVisitor(Mask mask, RegionFunction function, int baseY, int depth, HasFaweQueue hasFaweQueue) {
+        super(mask, function, depth, hasFaweQueue);
         checkNotNull(mask);
-
         this.baseY = baseY;
-
-        Collection<Vector> directions = getDirections();
+        final Collection<Vector> directions = this.getDirections();
         directions.clear();
         directions.add(new Vector(1, 0, 0));
         directions.add(new Vector(-1, 0, 0));
@@ -61,8 +63,10 @@ public class DownwardVisitor extends RecursiveVisitor {
     }
 
     @Override
-    protected boolean isVisitable(Vector from, Vector to) {
-        int fromY = from.getBlockY();
-        return (fromY == baseY || to.subtract(from).getBlockY() < 0) && super.isVisitable(from, to);
+    public boolean isVisitable(final Vector from, final Vector to) {
+        final int fromY = from.getBlockY();
+        return ((fromY == this.baseY) || (to.getBlockY() - from.getBlockY() < 0)) && super.isVisitable(from, to);
     }
+
+
 }

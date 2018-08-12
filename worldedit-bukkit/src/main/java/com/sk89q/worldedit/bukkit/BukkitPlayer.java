@@ -66,11 +66,11 @@ public class BukkitPlayer extends AbstractPlayerActor {
     }
 
     @Override
-    public BaseBlock getBlockInHand(HandSide handSide) throws WorldEditException {
+    public BlockState getBlockInHand(HandSide handSide) throws WorldEditException {
         ItemStack itemStack = handSide == HandSide.MAIN_HAND
                 ? player.getInventory().getItemInMainHand()
                 : player.getInventory().getItemInOffHand();
-        return BukkitAdapter.asBlockState(itemStack).toBaseBlock();
+        return BukkitAdapter.asBlockState(itemStack);
     }
 
     @Override
@@ -156,7 +156,7 @@ public class BukkitPlayer extends AbstractPlayerActor {
         if (params.length > 0) {
             send = send + "|" + StringUtil.joinString(params, "|");
         }
-        player.sendPluginMessage(plugin, WorldEditPlugin.CUI_PLUGIN_CHANNEL, send.getBytes(CUIChannelListener.UTF_8_CHARSET));
+        player.sendPluginMessage(plugin, WorldEditPlugin.getCuiPluginChannel(), send.getBytes(CUIChannelListener.UTF_8_CHARSET));
     }
 
     public Player getPlayer() {

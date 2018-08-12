@@ -49,12 +49,13 @@ public class YAMLConfiguration extends LocalConfiguration {
     public void load() {
         try {
             config.load();
-        } catch (IOException e) {
+        } catch (Throwable e) {
             logger.log(Level.WARNING, "Error loading WorldEdit configuration", e);
         }
 
+        // TODO FIXME use Config class with comments / bindings
         profile = config.getBoolean("debug", profile);
-        wandItem = convertLegacyItem(config.getString("wand-item", wandItem));
+        wandItem = ItemTypes.parse(config.getString("wand-item", wandItem.getId()));
 
         defaultChangeLimit = Math.max(-1, config.getInt(
                 "limits.max-blocks-changed.default", defaultChangeLimit));
@@ -77,8 +78,12 @@ public class YAMLConfiguration extends LocalConfiguration {
         butcherDefaultRadius = Math.max(-1, config.getInt("limits.butcher-radius.default", butcherDefaultRadius));
         butcherMaxRadius = Math.max(-1, config.getInt("limits.butcher-radius.maximum", butcherMaxRadius));
 
-        disallowedBlocks = new HashSet<>(config.getStringList("limits.disallowed-blocks", Lists.newArrayList(defaultDisallowedBlocks)));
-        allowedDataCycleBlocks = new HashSet<>(config.getStringList("limits.allowed-data-cycle-blocks", null));
+        disallowedBlocks =
+                new HashSet<>(config.getStringList("limits.disallowed-blocks", Lists.newArrayList(defaultDisallowedBlocks)))
+                .stream().map(e -> BlockTypes.parse(e)).collect(Collectors.toSet());
+        allowedDataCycleBlocks =
+                new HashSet<>(config.getStringList("limits.allowed-data-cycle-blocks", null))
+                .stream().map(e -> BlockTypes.parse(e)).collect(Collectors.toSet());
 
         registerHelp = config.getBoolean("register-help", true);
         logCommands = config.getBoolean("logging.log-commands", logCommands);
@@ -98,7 +103,7 @@ public class YAMLConfiguration extends LocalConfiguration {
         useInventoryCreativeOverride = config.getBoolean("use-inventory.creative-mode-overrides",
                 useInventoryCreativeOverride);
 
-        navigationWand = convertLegacyItem(config.getString("navigation-wand.item", navigationWand));
+        navigationWand = ItemTypes.parse(config.getString("navigation-wand.item", navigationWand.getId()));
         navigationWandMaxDistance = config.getInt("navigation-wand.max-distance", navigationWandMaxDistance);
         navigationUseGlass = config.getBoolean("navigation.use-glass", navigationUseGlass);
 

@@ -262,7 +262,7 @@ public class AnvilChunk implements Chunk {
         BlockState state = LegacyMapper.getInstance().getBlockFromLegacy(id, data);
         CompoundTag tileEntity = getBlockTileEntity(position);
 
-        return state.toBaseBlock(tileEntity);
+        return new BaseBlock(state, tileEntity);
     }
 
 }
