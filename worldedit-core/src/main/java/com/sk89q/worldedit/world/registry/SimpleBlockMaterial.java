@@ -46,7 +46,7 @@ class SimpleBlockMaterial implements BlockMaterial {
         return this.isAir;
     }
 
-    public void setIsAir(boolean isAir) {
+    public void setAir(boolean isAir) {
         this.isAir = isAir;
     }
 
